@@ -228,3 +228,15 @@ p#wd-id-selector-2 {
   width: 75px;
 }
 
+#wd-screen-size-label {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background-color: black;
+  color: white;
+  padding: 5px;
+  font-size: 12px;
+  z-index: 1000;
+  width: 220px;
+  text-align: center;
+}

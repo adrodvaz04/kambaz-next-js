@@ -1,8 +1,8 @@
+import "./index.css";
 import BackgroundColors from "./BackgroundColors";
 import Borders from "./Borders";
 import Corners from "./Corners";
 import ForegroundColors from "./ForegroundColors";
-import "./index.css";
 import Margins from "./Margins";
 import Padding from "./Padding";
 import Dimensions from "./Dimensions";
@@ -13,10 +13,17 @@ import GridLayout from "./GridLayout";
 import Flex from "./Flex";
 import MediaQueriesDemo from "./MediaQueriesDemo";
 import ReactIconsSampler from "./ReactIconsSampler";
+import BootstrapGrids from "./BootstrapGrids";
+import { Container } from "react-bootstrap";
+import ScreenSizeLabel from "./ScreenSizeLabel";
+import BootstrapTables from "./BootstrapTables";
+import BootstrapLists from "./BootstrapLists";
+import BootstrapForms from "./BootstrapForms";
+import BootstrapNavigation from "./BootstrapNavigation";
 
 export default function Lab2() {
   return (
-    <div id="wd-lab2">
+    <Container>
       <h2>Lab 2 - Cascading Style Sheets</h2>
       <h3>Styling with the STYLE attribute</h3>
       <p>
@@ -82,7 +89,13 @@ export default function Lab2() {
       <Flex></Flex>
       <MediaQueriesDemo></MediaQueriesDemo>
       <ReactIconsSampler></ReactIconsSampler>
-    </div>
+      <BootstrapGrids></BootstrapGrids>
+      <ScreenSizeLabel></ScreenSizeLabel>
+      <BootstrapTables></BootstrapTables>
+      <BootstrapLists></BootstrapLists>
+      <BootstrapForms></BootstrapForms>
+      <BootstrapNavigation></BootstrapNavigation>
+    </Container>
   );
 }
 
