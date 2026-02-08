@@ -14,7 +14,7 @@ export default function Signin() {
       />
       <Link
         id="wd-signin-btn"
-        href="/account/profile"
+        href="/dashboard"
         className="btn btn-primary w-100 mb-2"
       >
         Sign in{" "}
