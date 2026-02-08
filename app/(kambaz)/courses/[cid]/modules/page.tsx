@@ -7,11 +7,13 @@ import LessonControlButtons from "./LessonControlButtons";
 export default function Modules() {
   return (
     <div>
-      <ModulesControls />
+      <div className="size-fit">
+        <ModulesControls />
+      </div>
       <br />
       <br />
       <br />
-      <ListGroup className="rounded-0 mt-5" id="wd-modules">
+      <ListGroup className="rounded-0 mt-3" id="wd-modules">
         <ListGroupItem className="wd-module p-0 mb-5 fs-5 border-gray">
           <div className="wd-title p-3 ps-2 bg-secondary">
             <BsGripVertical className="me-2 fs-3" />
