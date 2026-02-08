@@ -9,7 +9,7 @@ import { FaPlus } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
 export default function ModulesControls() {
   return (
-    <div id="wd-modules-controls" className="text-nowrap">
+    <div id="wd-modules-controls" className="flex-wrap">
       <Button
         variant="danger"
         size="lg"

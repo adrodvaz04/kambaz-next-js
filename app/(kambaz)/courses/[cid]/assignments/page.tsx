@@ -46,7 +46,10 @@ export default function Assignments() {
           variant="danger"
           className="me-2 text-nowrap float-end"
         >
-          <FaPlus className="fs-5 me-2 m-1" />
+          <FaPlus
+            className="position-relative me-2"
+            style={{ bottom: "1px" }}
+          />
           Assignment{" "}
         </Button>
       </div>
@@ -59,7 +62,10 @@ export default function Assignments() {
             <BsGripVertical className="me-2 fs-3" />
             <span className="font-bold me-2"> Assignments </span>
             <span className="size-fit me-2"> 40% of Total </span>
-            <FaPlus className="fs-5" />
+            <FaPlus
+              className="position-relative me-2"
+              style={{ bottom: "1px" }}
+            />
           </div>
           <ListGroup className="rounded-0">
             <ListGroupItem className="wd-lesson p-3 ps-1 d-flex">
@@ -67,7 +73,7 @@ export default function Assignments() {
                 <BsGripVertical className="me-2 fs-3" />
                 <MdOutlineAssignment className="me-2 fs-3" color="green" />
               </div>
-              <Link href="/courses/001/assignments/001/" className="text-wrap">
+              <Link href="/courses/001/assignments/001/" className="text-wrap text-black text-decoration-none">
                 <b>A1</b> <br />
                 <span className="text-danger"> Multiple Modules </span> |
                 <b> Not available until </b>
@@ -83,7 +89,7 @@ export default function Assignments() {
                 <BsGripVertical className="me-2 fs-3" />
                 <MdOutlineAssignment className="me-2 fs-3" color="green" />
               </div>
-              <Link href="/courses/001/assignments/001/" className="text-wrap">
+              <Link href="/courses/001/assignments/001/" className="text-wrap  text-black text-decoration-none">
                 <b>A2</b> <br />
                 <span className="text-danger"> Multiple Modules </span> |
                 <b> Not available until </b>
