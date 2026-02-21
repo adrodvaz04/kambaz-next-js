@@ -8,6 +8,7 @@ import {
   ListGroup,
   ListGroupItem,
 } from "react-bootstrap";
+import { assignments } from "@/app/(kambaz)/database";
 import InputGroupText from "react-bootstrap/esm/InputGroupText";
 import { FaPlus } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
@@ -15,8 +16,11 @@ import { BsGripVertical } from "react-icons/bs";
 import LessonControlButtons from "../modules/LessonControlButtons";
 import { MdOutlineAssignment } from "react-icons/md";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function Assignments() {
+  const { cid } = useParams();
+
   return (
     <div id="wd-assignments" className="me-2">
       <div className="d-flex mt-4">
@@ -62,51 +66,45 @@ export default function Assignments() {
             <BsGripVertical className="me-2 fs-3" />
             <span className="font-bold me-2 fs-4"> Assignments </span>
             <div className="float-end">
-              <span className="size-fit me-2" style={{borderRadius: "2px!important", borderColor: "black!important"}}> 40% of Total </span>
+              <span
+                className="size-fit me-2"
+                style={{
+                  borderRadius: "2px!important",
+                  borderColor: "black!important",
+                }}
+              >
+                {" "}
+                40% of Total{" "}
+              </span>
               <FaPlus />
             </div>
           </div>
 
-          <ListGroup className="rounded-0">
-            <ListGroupItem className="wd-lesson p-3 ps-1 d-flex">
-              <div className="d-flex pt-3 pe-2">
-                <BsGripVertical className="me-2 fs-3" />
-                <MdOutlineAssignment className="me-2 fs-3" color="green" />
-              </div>
-              <Link
-                href="/courses/001/assignments/001/"
-                className="text-wrap text-black text-decoration-none me-4"
-              >
-                <b>A1</b> <br />
-                <span className="text-danger"> Multiple Modules </span> |
-                <b> Not available until </b>
-                May 13th at 12:00am |<b> Due </b>
-                May 20th at 11:59pm | 100pts
-              </Link>
-              <div className="pt-3">
-                <LessonControlButtons />
-              </div>
-            </ListGroupItem>
-            <ListGroupItem className="wd-lesson p-3 ps-1 d-flex">
-              <div className="d-flex pt-3 pe-2">
-                <BsGripVertical className="me-2 fs-3" />
-                <MdOutlineAssignment className="me-2 fs-3" color="green" />
-              </div>
-              <Link
-                href="/courses/001/assignments/001/"
-                className="text-wrap  text-black text-decoration-none me-4"
-              >
-                <b>A2</b> <br />
-                <span className="text-danger"> Multiple Modules </span> |
-                <b> Not available until </b>
-                May 27th at 12:00am |<b> Due </b>
-                June 10th at 11:59pm | 100pts
-              </Link>
-              <div className="pt-3">
-                <LessonControlButtons />
-              </div>
-            </ListGroupItem>
-          </ListGroup>
+          {assignments
+            .filter((assignment: any) => assignment.course === cid)
+            .map((assignment: any) => (
+              <ListGroup className="rounded-0">
+                <ListGroupItem className="wd-lesson p-3 ps-1 d-flex">
+                  <div className="d-flex pt-3 pe-2">
+                    <BsGripVertical className="me-2 fs-3" />
+                    <MdOutlineAssignment className="me-2 fs-3" color="green" />
+                  </div>
+                  <Link
+                    href={`/courses/${assignment.course}/assignments/${assignment._id}/`}
+                    className="text-wrap text-black text-decoration-none me-4"
+                  >
+                    <b>{assignment._id}</b> <br />
+                    <span className="text-danger"> {assignment.title} </span> |
+                    <b> Not available until </b>
+                    {assignment.availableDate} at 12:00am |<b> Due </b>
+                    {assignment.dueDate} at 11:59pm | 100pts
+                  </Link>
+                  <div className="float-end pt-3">
+                    <LessonControlButtons />
+                  </div>
+                </ListGroupItem>
+              </ListGroup>
+            ))}
         </ListGroupItem>
       </ListGroup>
     </div>

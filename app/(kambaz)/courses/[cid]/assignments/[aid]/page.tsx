@@ -1,3 +1,8 @@
+"use client";
+
+import { redirect, useParams } from "next/navigation";
+import { assignments } from "@/app/(kambaz)/database";
+
 import {
   Button,
   Form,
@@ -9,13 +14,32 @@ import {
 } from "react-bootstrap";
 
 export default function AssignmentEditor() {
+  const { aid } = useParams();
+  const currentAssignment = assignments.filter((a) => a._id === aid)[0] || undefined;
+
+  const onRedirect = () => {
+    redirect("../assignments");
+  }
+
+  console.log(currentAssignment)
   return (
     <div id="wd-assignments-editor" className="ps-2 fs-5">
       <Form>
         <FormLabel htmlFor="wd-name"> Assignment Name </FormLabel>
-        <FormControl id="wd-name" type="text" defaultValue="A1" size="lg"></FormControl>
+        <FormControl
+          id="wd-name"
+          type="text"
+          defaultValue={aid}
+          size="lg"
+        ></FormControl>
         <br />
-        <FormControl id="wd-description" as="textarea" rows={5} size="lg"></FormControl>
+        <FormControl
+          id="wd-description"
+          as="textarea"
+          rows={5}
+          size="lg"
+          defaultValue={currentAssignment?.description}
+        ></FormControl>
         <br />
 
         <Table borderless>
@@ -25,7 +49,12 @@ export default function AssignmentEditor() {
                 <FormLabel htmlFor="wd-points"> Points </FormLabel>
               </td>
               <td>
-                <FormControl type="text" id="wd-points" defaultValue={100} size="lg"/>
+                <FormControl
+                  type="text"
+                  id="wd-points"
+                  defaultValue={currentAssignment?.points}
+                  size="lg"
+                />
               </td>
             </tr>
             <tr>
@@ -36,7 +65,11 @@ export default function AssignmentEditor() {
                 </FormLabel>
               </td>
               <td>
-                <FormSelect name="assignment-group" id="wd-assignment-group" size="lg">
+                <FormSelect
+                  name="assignment-group"
+                  id="wd-assignment-group"
+                  size="lg"
+                >
                   <option value="assignments" defaultChecked>
                     {" "}
                     ASSIGNMENTS
@@ -141,7 +174,7 @@ export default function AssignmentEditor() {
                 <br />
                 <FormControl
                   type="date"
-                  defaultValue="2024-05-13"
+                  defaultValue={currentAssignment?.dueDate}
                   id="wd-due-date"
                   size="lg"
                 />
@@ -157,7 +190,7 @@ export default function AssignmentEditor() {
                         <FormControl
                           type="date"
                           id="wd-available-from-date"
-                          defaultValue={"1000-01-01"}
+                          defaultValue={currentAssignment?.availableDate}
                           size="lg"
                         />
                       </td>
@@ -182,8 +215,15 @@ export default function AssignmentEditor() {
           </tbody>
         </Table>
         <div className="d-flex flex-row-reverse gap-2 fs-5">
-          <Button size="lg" variant="danger" className="me-2"> Save </Button>
-          <Button size="lg" variant="secondary"> Cancel </Button>
+          <Button size="lg" variant="danger" className="me-2"
+          onClick={onRedirect}>
+            {" "}
+            Save{" "}
+          </Button>
+          <Button size="lg" variant="secondary" onClick={onRedirect}>
+            {" "}
+            Cancel{" "}
+          </Button>
         </div>
       </Form>
     </div>
