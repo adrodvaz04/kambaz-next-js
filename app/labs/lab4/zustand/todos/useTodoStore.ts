@@ -10,38 +10,39 @@ interface TodosState {
   currentTodo: Todo;
   addTodo: (todo: Todo) => void;
   deleteTodo: (todo: Todo) => void;
-  updateTodos: (todo: Todo) => void;
+  updateTodo: (todo: Todo) => void;
   setTodo: (todo: Todo) => void;
 }
 
 export const useTodoStore = create<TodosState>((set) => ({
-  todos: [],
-  currentTodo: { id: "", title: "" },
-  addTodo: (t) => {
+  todos: [
+    { id: "1", title: "Learn React" },
+    { id: "2", title: "Learn Node" },
+  ],
+  currentTodo: { id: "", title: "Learn Mongo" },
+  addTodo: (todo) => {
     set((state) => ({
       todos: [
         ...state.todos,
-        { id: new Date().getTime().toString(), title: "" },
+        { ...todo, id: new Date().getTime().toString() },
       ],
+      currentTodo: { id: "", title: "" },
     }));
   },
-  deleteTodo: (t) => {
+  deleteTodo: (todo) => {
     set((state) => ({
-      todos: state.todos.splice(
-        state.todos.findIndex((t) => t.id === state.currentTodo.id),
-      ),
+      todos: state.todos.filter((t) => t.id !== todo.id),
     }));
   },
-  updateTodos: (t) => {
+  updateTodo: (todo) => {
     set((state) => ({
       todos: state.todos.map((t) =>
-        t.id === state.currentTodo.id
-          ? { ...t, title: state.currentTodo.title }
-          : t,
+        t.id === todo.id ? todo : t
       ),
+      currentTodo: { id: "", title: "" },
     }));
   },
-  setTodo: (t) => {
-    set({ currentTodo: t });
+  setTodo: (todo) => {
+    set({ currentTodo: todo });
   },
 }));

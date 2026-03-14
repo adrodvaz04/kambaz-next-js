@@ -25,7 +25,7 @@ export default function ReactContextTodoList() {
       <ListGroup>
         <ListGroupItem>
           <Button
-            onClick={() => addTodo(currentTodo?.title)}
+            onClick={() => addTodo(currentTodo)}
             id="wd-add-todo-click"
           >
             {" "}

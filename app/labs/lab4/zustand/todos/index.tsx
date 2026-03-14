@@ -4,7 +4,7 @@ import { useTodoStore } from "./useTodoStore";
 import { FormControl, ListGroup, ListGroupItem, Button } from "react-bootstrap";
 
 export default function ZustandTodos() {
-  const { todos, currentTodo, addTodo, deleteTodo, updateTodos, setTodo } =
+  const { todos, currentTodo, addTodo, deleteTodo, updateTodo, setTodo } =
     useTodoStore()!;
   let renderedTodos = todos.map((t) => (
     <ListGroupItem key={t.id}>
@@ -30,7 +30,7 @@ export default function ZustandTodos() {
             Add{" "}
           </Button>
           <Button
-            onClick={() => updateTodos(currentTodo)}
+            onClick={() => updateTodo(currentTodo)}
             id="wd-update-todo-click"
           >
             {" "}
