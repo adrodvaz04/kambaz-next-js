@@ -24,9 +24,11 @@ export default function Lab4() {
       <div id="wd-lab-4">
         <h4>Lab 4</h4>
         <Link href="./lab4/redux"> Redux Examples </Link>
-        <br />
+        <hr />
         <Link href="./lab4/react-context">React Context Examples</Link>
-
+        <hr />
+        <Link href="./lab4/zustand"> Zustand Examples </Link>
+        <hr />
         <ClickEvent></ClickEvent>
         <PassingDataOnEvent></PassingDataOnEvent>
         <PassingFunctions theFunction={sayHello}></PassingFunctions>
