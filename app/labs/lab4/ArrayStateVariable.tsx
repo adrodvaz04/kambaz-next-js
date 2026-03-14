@@ -1,5 +1,10 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "./redux/store";
+import { ListGroup, ListGroupItem } from "react-bootstrap";
+
 export default function ArrayStateVariable() {
+  const { todos } = useSelector((state: RootState) => state.todosReducer);
   const [array, setArray] = useState([1, 2, 3, 4, 5]);
   const addElement = () => {
     setArray([...array, Math.floor(Math.random() * 100)]);
@@ -11,15 +16,11 @@ export default function ArrayStateVariable() {
     <div id="wd-array-state-variables">
       <h2>Array State Variable</h2>
       <button onClick={addElement}>Add Element</button>
-      <ul>
-        {array.map((item, index) => (
-          <li key={index}>
-            {" "}
-            {item}
-            <button onClick={() => deleteElement(index)}>Delete</button>
-          </li>
+      <ListGroup>
+        {todos.map((todo: any) => (
+          <ListGroupItem key={todo.id}>{todo.title}</ListGroupItem>
         ))}
-      </ul>
+      </ListGroup>
       <hr />
     </div>
   );
