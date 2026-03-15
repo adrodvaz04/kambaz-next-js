@@ -1,25 +1,40 @@
 "use client";
+import { RootState } from "@/app/(kambaz)/store";
+import Link from "next/link";
+import { redirect, useParams } from "next/navigation";
 import {
-  Row,
-  Col,
   Button,
   FormControl,
   InputGroup,
   ListGroup,
   ListGroupItem,
 } from "react-bootstrap";
-import { assignments } from "@/app/(kambaz)/database";
 import InputGroupText from "react-bootstrap/esm/InputGroupText";
-import { FaPlus } from "react-icons/fa";
-import { FaMagnifyingGlass } from "react-icons/fa6";
 import { BsGripVertical } from "react-icons/bs";
-import LessonControlButtons from "../modules/LessonControlButtons";
+import { FaPlus } from "react-icons/fa";
+import { FaMagnifyingGlass, FaTrash } from "react-icons/fa6";
 import { MdOutlineAssignment } from "react-icons/md";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import LessonControlButtons from "../modules/LessonControlButtons";
+import { deleteAssignment } from "./reducer";
+
+import { useState } from "react";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 export default function Assignments() {
   const { cid } = useParams();
+
+  const { assignments } = useSelector(
+    (state: RootState) => state.assignmentsReducer,
+  );
+  const dispatch = useDispatch();
+
+  const [assignmentToDelete, setAssignmentToDelete] = useState<
+    string | undefined
+  >(undefined);
+  const handleClose = () => setAssignmentToDelete(undefined);
+  const handleShow = (assignmentId: string) =>
+    setAssignmentToDelete(assignmentId);
 
   return (
     <div id="wd-assignments" className="me-2">
@@ -49,6 +64,7 @@ export default function Assignments() {
           id="wd-add-assignment"
           variant="danger"
           className="me-2 text-nowrap float-end"
+          onClick={() => redirect(`/courses/${cid}/assignments/new`)}
         >
           <FaPlus
             className="position-relative me-2"
@@ -96,17 +112,30 @@ export default function Assignments() {
                     <b>{assignment._id}</b> <br />
                     <span className="text-danger"> {assignment.title} </span> |
                     <b> Not available until </b>
-                    {assignment.availableDate} at 12:00am |<b> Due </b>
-                    {assignment.dueDate} at 11:59pm | 100pts
+                    {assignment.availableFromDate} at 12:00am |<b> Due </b>
+                    {assignment.dueDate} at 11:59pm | {assignment.points}pts
                   </Link>
-                  <div className="float-end pt-3">
-                    <LessonControlButtons />
+                  <div className="d-flex float-end pt-3">
+                    <span className="m-1">
+                      <LessonControlButtons />
+                    </span>
+                    <FaTrash
+                      className="m-1 text-danger"
+                      onClick={() => handleShow(assignment._id)}
+                    ></FaTrash>
                   </div>
                 </ListGroupItem>
               </ListGroup>
             ))}
         </ListGroupItem>
       </ListGroup>
+      <DeleteConfirmModal
+        show={assignmentToDelete !== undefined}
+        handleClose={handleClose}
+        deleteOperation={() => dispatch(deleteAssignment(assignmentToDelete))}
+        dialogTitle={"Delete Assignment"}
+        bodyText={"Are you sure you want to delete this assignment?"}
+      ></DeleteConfirmModal>
     </div>
   );
 }

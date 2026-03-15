@@ -1,27 +1,33 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, useState } from "react";
 import CourseNavigation from "./navigation";
 import { FaAlignJustify } from "react-icons/fa";
 import { courses } from "../../database";
 import Breadcrumb from "./Breadcrumb";
+import { useSelector } from "react-redux";
+import { useParams } from "next/navigation";
+import { RootState } from "../../store";
 
-export default async function CoursesLayout({
+export default function CoursesLayout({
   children,
-  params,
-}: Readonly<{ children: ReactNode; params: Promise<{ cid: string }> }>) {
-  const { cid } = await params;
-  const course = courses.find((course) => course._id.includes(cid));
+}: {
+  children: ReactNode;
+}) {
+  const [hideNavBar, setHideNavbar] = useState<boolean>(false);
+  const { cid } = useParams();
+  const { courses } = useSelector((state: RootState) => state.coursesReducer);
+  const course = courses.find((course) => course._id === cid);
   return (
     <div id="wd-courses">
       <h2 className="text-black">
-        <FaAlignJustify className="me-4 fs-4 mb-1" />
+        <FaAlignJustify className="me-4 fs-4 mb-1" onClick={() => setHideNavbar(!hideNavBar)}/>
         <Breadcrumb courseName={course?.name} />
       </h2>
       <hr />
       <div className="d-flex">
-        <div className="d-mb-block">
-          {" "}
-          {/* was set to d-none, assuming it will be changed to dynamic display eventually */}
-          <CourseNavigation params={cid} />
+        <div className="d-mb-block" hidden={hideNavBar}>
+          <CourseNavigation params={cid as string} />
         </div>
         <div className="flex-fill">{children}</div>
       </div>

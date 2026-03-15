@@ -6,7 +6,8 @@
     "description": "Students will practice simulated propulsion through a variety of labs",
     "points": 120,
     "dueDate": "2020-04-11",
-    "availableDate": "2020-04-09"
+    "availableFromDate": "2020-04-09",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A102",
@@ -15,7 +16,8 @@
     "description": "Following A101, students will analyze their results and present them as a report.",
     "points": 80,
     "dueDate": "2020-04-14",
-    "availableDate": "2020-04-19"
+    "availableFromDate": "2020-04-19",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A103",
@@ -24,7 +26,8 @@
     "description": "Students will apply their knowledge in a mesocosm nozzle design experiment.",
     "points": 130,
     "dueDate": "2023-01-14",
-    "availableDate": "2023-01-09"
+    "availableFromDate": "2023-01-09",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A201",
@@ -33,7 +36,8 @@
     "description": "Due end of day, in-person or online.",
     "points": 20,
     "dueDate": "2025-02-12",
-    "availableDate": "2025-02-12"
+    "availableFromDate": "2025-02-12",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A202",
@@ -42,7 +46,8 @@
     "description": "Submit today's in-class flow analysis hand-written (LEGIBLY) or typed.",
     "points": 30,
     "dueDate": "2026-01-31",
-    "availableDate": "2025-01-31"
+    "availableFromDate": "2025-01-31",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A203",
@@ -51,7 +56,8 @@
     "description": "Complete problems 21-27 from Hammond & Pearce's. Show full process to avoid unnecessary docking.",
     "points": 50,
     "dueDate": "2025-02-10",
-    "availableDate": "2025-02-01"
+    "availableFromDate": "2025-02-01",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A301",
@@ -60,7 +66,8 @@
     "description": "Please write your group's names and IDs on the top of the submitted document.",
     "points": 100,
     "dueDate": "2024-08-13",
-    "availableDate": "2024-08-01"
+    "availableFromDate": "2024-08-01",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A302",
@@ -69,7 +76,8 @@
     "description": "Using the formulas from today's slides, calculate orbital velocity and acceleration over time for the attached PSet.",
     "points": 25,
     "dueDate": "2024-10-28",
-    "availableDate": "2024-10-20"
+    "availableFromDate": "2024-10-20",
+    "availableUntilDate": "2999-01-01"
   },
   {
     "_id": "A303",
@@ -77,6 +85,7 @@
     "course": "RS103",
     "points": 103,
     "dueDate": "2024-11-01",
-    "availableDate": "2024-11-01"
+    "availableFromDate": "2024-11-01",
+    "availableUntilDate": "2999-01-01"
   }
 ]
