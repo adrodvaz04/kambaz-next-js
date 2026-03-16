@@ -24,7 +24,7 @@ export default function Dashboard() {
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer,
-  );
+  ) as any | null;
   const { enrollments } = useSelector(
     (state: RootState) => state.enrollmentsReducer,
   );
@@ -43,7 +43,7 @@ export default function Dashboard() {
   const [enrollmentMode, setEnrollmentMode] = useState<boolean>(false);
 
   const isEnrolled = (userId: string, courseId: string) =>
-    enrollments.some((e) => e.user === userId && e.course === course._id);
+    enrollments.some((e) => e.user === userId && e.course === courseId);
 
   return (
     <div id="wd-dashboard">
@@ -114,7 +114,7 @@ export default function Dashboard() {
                   ? true
                   : enrollments.some(
                       (enrollment) =>
-                        enrollment.user === currentUser._id &&
+                        enrollment.user === currentUser?._id &&
                         enrollment.course === course._id,
                     ),
             )
@@ -130,7 +130,8 @@ export default function Dashboard() {
                     onNavigate={(e) => {
                       if (
                         !(
-                          currentUser && isEnrolled(currentUser._id, course._id)
+                          currentUser &&
+                          isEnrolled(currentUser?._id, course._id)
                         )
                       ) {
                         e.preventDefault();
@@ -187,13 +188,13 @@ export default function Dashboard() {
                           variant="success"
                           hidden={
                             !enrollmentMode || // not in enrollment mode or
-                            isEnrolled(currentUser._id, course._id)
+                            isEnrolled(currentUser?._id, course._id)
                           }
                           onClick={(e) => {
                             e.preventDefault();
                             dispatch(
                               enroll({
-                                user: currentUser._id,
+                                user: currentUser?._id,
                                 course: course._id,
                               }),
                             );
@@ -205,14 +206,14 @@ export default function Dashboard() {
                         <Button
                           hidden={
                             !enrollmentMode || // not in enrollment mode or
-                            !isEnrolled(currentUser._id, course._id)
+                            !isEnrolled(currentUser?._id, course._id)
                             // already unenrolled
                           }
                           onClick={(e) => {
                             e.preventDefault();
                             dispatch(
                               unenroll({
-                                user: currentUser._id,
+                                user: currentUser?._id,
                                 course: course._id,
                               }),
                             );
