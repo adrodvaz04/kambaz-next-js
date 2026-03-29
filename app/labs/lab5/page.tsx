@@ -7,6 +7,7 @@ import WorkingWithObjects from "./WorkingWithObjects";
 import HttpClient from "./HttpClient";
 import WorkingWithObjectsAsynchronously from "./WorkingWithObjectsAsynchronously";
 import WorkingWithArraysAsynchronously from "./WorkingWithArraysAsynchronously";
+import CalculatorNextWebApiClient from "./CalculatorNextWebApiClient";
 
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
@@ -28,6 +29,7 @@ export default function Lab5() {
       <HttpClient></HttpClient>
       <WorkingWithObjectsAsynchronously></WorkingWithObjectsAsynchronously>
       <WorkingWithArraysAsynchronously></WorkingWithArraysAsynchronously>
+      <CalculatorNextWebApiClient></CalculatorNextWebApiClient>
     </div>
   );
 }

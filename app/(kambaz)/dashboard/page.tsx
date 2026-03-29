@@ -1,7 +1,12 @@
 "use client";
-
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewCourse, deleteCourse, updateCourse } from "../courses/reducer";
+import {
+  addNewCourse,
+  deleteCourse,
+  updateCourse,
+  setCourses,
+} from "../courses/reducer";
 import { RootState } from "../store";
 
 import { FormControl } from "react-bootstrap";
@@ -19,6 +24,7 @@ import {
   Button,
 } from "react-bootstrap";
 import { enroll, unenroll } from "../enrollments/reducer";
+import * as client from "../courses/client";
 
 export default function Dashboard() {
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
@@ -45,6 +51,44 @@ export default function Dashboard() {
   const isEnrolled = (userId: string, courseId: string) =>
     enrollments.some((e) => e.user === userId && e.course === courseId);
 
+  const fetchCourses = async () => {
+    try {
+      const courses = await client.findMyCourses();
+      dispatch(setCourses(courses));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onAddNewCourse = async () => {
+    const newCourse = await client.createCourse(course);
+    dispatch(setCourses([...courses, newCourse]));
+  };
+
+  const onDeleteCourse = async (courseId: string) => {
+    const status = await client.deleteCourse(courseId);
+    dispatch(setCourses(courses.filter((course) => course._id !== courseId)));
+  };
+
+  const onUpdateCourse = async () => {
+    await client.updateCourse(course);
+    dispatch(
+      setCourses(
+        courses.map((c) => {
+          if (c._id === course._id) {
+            return course;
+          } else {
+            return c;
+          }
+        }),
+      ),
+    );
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, [currentUser]);
+
   return (
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
@@ -61,30 +105,17 @@ export default function Dashboard() {
         </Button>
         <Button
           className="btn btn-warning float-end me-2"
-          onClick={() => dispatch(updateCourse(course))}
+          onClick={onUpdateCourse}
           id="wd-update-course-click"
         >
           Update{" "}
         </Button>
         <Button
+          onClick={onAddNewCourse}
           className="btn btn-primary float-end me-3"
           id="wd-add-new-course-click"
-          onClick={() => {
-            const newCourse = { ...course, _id: uuidv4() };
-            dispatch(addNewCourse(newCourse));
-            setCourse({
-              _id: "0",
-              name: "New Course",
-              number: "New Number",
-              startDate: "2023-09-10",
-              endDate: "2023-12-15",
-              image: "/images/reactjs.jpg",
-              description: "New Description",
-            });
-          }}
         >
-          {" "}
-          Add{" "}
+          Add
         </Button>
       </h5>
       <br />
@@ -169,12 +200,11 @@ export default function Dashboard() {
                           Edit
                         </Button>
                         <Button
+                          className="btn btn-danger float-end"
                           onClick={(event) => {
                             event.preventDefault();
-                            dispatch(deleteCourse(course._id));
+                            onDeleteCourse(course._id);
                           }}
-                          className="btn btn-danger float-end"
-                          id="wd-delete-course-click"
                         >
                           Delete
                         </Button>
