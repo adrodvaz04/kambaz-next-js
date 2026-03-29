@@ -1,6 +1,5 @@
 import axios from "axios";
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
-const TODOS_API = `${HTTP_SERVER}/lab5/todos`;
 
 export const fetchWelcomeMessage = async () => {
   const response = await axios.get(`${HTTP_SERVER}/lab5/welcome`);
@@ -15,6 +14,8 @@ export const updateTitle = async (title: string) => {
   const response = await axios.get(`${ASSIGNMENT_API}/title/${title}`);
   return response.data;
 };
+
+const TODOS_API = `${HTTP_SERVER}/lab5/todos`;
 
 export const fetchTodos = async () => {
   const response = await axios.get(`${HTTP_SERVER}/lab5/todos`);
