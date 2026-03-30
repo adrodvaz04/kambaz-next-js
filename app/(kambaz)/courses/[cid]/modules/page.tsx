@@ -1,53 +1,120 @@
+"use client";
+import { useParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
+import { BsGripVertical } from "react-icons/bs";
+import LessonControlButtons from "./LessonControlButtons";
+import ModuleControlButtons from "./ModuleControlButtons";
+import ModulesControls from "./modulesControls";
+import * as client from "../../client";
+import {
+  addModule,
+  deleteModule,
+  editModule,
+  updateModule,
+  setModules,
+} from "./reducer";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../../../store";
+
 export default function Modules() {
+  const { cid } = useParams();
+  const { modules } = useSelector((state: RootState) => state.modulesReducer);
+  const [moduleName, setModuleName] = useState<string>("");
+  const dispatch = useDispatch();
+
+  const onCreateModuleForCourse = async () => {
+    if (!cid || Array.isArray(cid)) {
+      console.log("module not created: cid", cid);
+      return;
+    }
+
+    const newModule = { name: moduleName, course: cid };
+    const createdModule = await client.createModuleForCourse(cid, newModule);
+    dispatch(setModules([...modules, createdModule]));
+  };
+
+  const fetchModules = async () => {
+    const modules = await client.findModulesForCourse(cid as string);
+    dispatch(setModules(modules));
+  };
+
+  const onRemoveModule = async (moduleId: string) => {
+    await client.deleteModule(moduleId);
+    dispatch(setModules(modules.filter((m: any) => m._id !== moduleId)));
+  };
+
+  const onUpdateModule = async (module: any) => {
+    await client.updateModule(module);
+    const newModules = modules.map((m: any) =>
+      m._id === module._id ? module : m,
+    );
+    dispatch(setModules(newModules));
+  };
+
+  useEffect(() => {
+    fetchModules();
+  }, []);
+
   return (
     <div>
-      <table>
-        <tbody>
-          <tr>
-            <td> <button> Collapse All </button></td>
-            <td> <button> View Progress </button></td>
-            <td> 
-              <select name="publish-assignments" id="wd-publish-assignments">
-                <option selected value="all"> Publish All </option> 
-              </select>
-            </td>
-            <td> <button> + Module </button></td>
-          </tr>
-        </tbody>
-      </table>
-      <ul id="wd-modules">
-        <li className="wd-module">
-          <div className="wd-title">Week 1, Lecture 1 - Course Introduction, Syllabus, Agenda</div>
-          <ul className="wd-lessons">
-            <li className="wd-lesson">
-              <span className="wd-title">LEARNING OBJECTIVES</span>
-              <ul className="wd-content">
-                <li className="wd-content-item">Introduction to the course</li>
-                <li className="wd-content-item">Learn what is Web Development</li>
-              </ul>
-            </li>
-            <li className="wd-lesson">
-              <span className="wd-title">READING </span>
-              <ul className="wd-content">
-                <li className="wd-content-item">Full Stack Developer - Chapter 1 - Introduction</li>
-                <li className="wd-content-item"> Full Stack Developer - Chapter 2 - Creating User Interfaces </li>
-              </ul>
-            </li>
-            <li className="wd-lesson">
-              <span className="wd-title">SLIDES</span>
-              <ul className="wd-content">
-                <li className="wd-content-item">Introduction to Web Development</li>
-                <li className="wd-content-item">Creating an HTTP server with Node.js </li>
-                <li className="wd-content-item"> Creating a React application </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li className="wd-module">
-          <div className="wd-title">Week 2</div> </li>
-        <li className="wd-module">
-          <div className="wd-title">Week 3</div> </li>
-      </ul>
+      <div className="size-fit">
+        <ModulesControls
+          moduleName={moduleName}
+          setModuleName={setModuleName}
+          addModule={onCreateModuleForCourse}
+        />
+      </div>
+      <br />
+      <br />
+      <br />
+      <ListGroup className="rounded-0 mt-3" id="wd-modules">
+        {modules.map((module: any) => (
+          <ListGroupItem
+            className="wd-module p-0 mb-5 fs-5 border-gray"
+            key={module.name}
+          >
+            <div className="wd-title p-3 ps-2 bg-secondary">
+              <BsGripVertical className="me-2 fs-3" />
+              {!module.editing && module.name}
+              {module.editing && (
+                <FormControl
+                  className="w-50 d-inline-block"
+                  onChange={(e) =>
+                    setModuleName(e.target.value)
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onUpdateModule({ ...module, name: moduleName, editing: false });
+                    }
+                  }}
+                  defaultValue={module.name}
+                />
+              )}
+              <ModuleControlButtons
+                moduleId={module._id}
+                deleteModule={(moduleId: string) => onRemoveModule(moduleId)}
+                editModule={(moduleId: string) =>
+                  dispatch(editModule(moduleId))
+                }
+              />{" "}
+            </div>
+            {module.lessons && (
+              <ListGroup className="wd-lessons rounded-0">
+                {module.lessons.map((lesson: any) => (
+                  <ListGroupItem
+                    className="wd-lesson p-3 ps-1"
+                    key={lesson.name}
+                  >
+                    <BsGripVertical className="me-2 fs-3" /> {lesson.name}{" "}
+                    <LessonControlButtons />{" "}
+                  </ListGroupItem>
+                ))}
+              </ListGroup>
+            )}
+          </ListGroupItem>
+        ))}
+      </ListGroup>
     </div>
-);
+  );
 }

@@ -1,0 +1,28 @@
+#wd-set-todo-click {
+    background: blue;
+    color: white;
+    border: 0px;
+    border-radius: 25%;
+}
+
+
+#wd-delete-todo-click {
+    background: red;
+    color: white;
+    border: 0px;
+    border-radius: 25%;
+}
+
+#wd-update-todo-click {
+    background: gold;
+    color: black;
+    border-radius: 25%;
+    border: 0px;
+}
+
+#wd-add-todo-click {
+    background: green;
+    color: white;
+    border-radius: 3px;
+    border: 0px;
+}

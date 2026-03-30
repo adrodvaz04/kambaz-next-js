@@ -1,0 +1,91 @@
+[
+  {
+    "_id": "A101",
+    "title": "Propulsion Assignment",
+    "course": "RS101",
+    "description": "Students will practice simulated propulsion through a variety of labs",
+    "points": 120,
+    "dueDate": "2020-04-11",
+    "availableFromDate": "2020-04-09",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A102",
+    "title": "Combustion Analysis",
+    "course": "RS101",
+    "description": "Following A101, students will analyze their results and present them as a report.",
+    "points": 80,
+    "dueDate": "2020-04-14",
+    "availableFromDate": "2020-04-19",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A103",
+    "title": "Nozzle Design Project",
+    "course": "RS101",
+    "description": "Students will apply their knowledge in a mesocosm nozzle design experiment.",
+    "points": 130,
+    "dueDate": "2023-01-14",
+    "availableFromDate": "2023-01-09",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A201",
+    "title": "Aerodynamics Quiz",
+    "course": "RS102",
+    "description": "Due end of day, in-person or online.",
+    "points": 20,
+    "dueDate": "2025-02-12",
+    "availableFromDate": "2025-02-12",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A202",
+    "title": "Flow Analysis",
+    "course": "RS102",
+    "description": "Submit today's in-class flow analysis hand-written (LEGIBLY) or typed.",
+    "points": 30,
+    "dueDate": "2026-01-31",
+    "availableFromDate": "2025-01-31",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A203",
+    "title": "Heating Analysis",
+    "course": "RS102",
+    "description": "Complete problems 21-27 from Hammond & Pearce's. Show full process to avoid unnecessary docking.",
+    "points": 50,
+    "dueDate": "2025-02-10",
+    "availableFromDate": "2025-02-01",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A301",
+    "title": "Structural Design Task",
+    "course": "RS103",
+    "description": "Please write your group's names and IDs on the top of the submitted document.",
+    "points": 100,
+    "dueDate": "2024-08-13",
+    "availableFromDate": "2024-08-01",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A302",
+    "title": "Orbital Calculations",
+    "course": "RS103",
+    "description": "Using the formulas from today's slides, calculate orbital velocity and acceleration over time for the attached PSet.",
+    "points": 25,
+    "dueDate": "2024-10-28",
+    "availableFromDate": "2024-10-20",
+    "availableUntilDate": "2999-01-01"
+  },
+  {
+    "_id": "A303",
+    "title": "Systems Engineering Exam",
+    "course": "RS103",
+    "points": 103,
+    "dueDate": "2024-11-01",
+    "availableFromDate": "2024-11-01",
+    "availableUntilDate": "2999-01-01"
+  }
+]

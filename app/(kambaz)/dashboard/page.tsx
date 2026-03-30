@@ -1,149 +1,308 @@
-'use client';
+"use client";
+import { useCallback, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setCourses } from "../courses/reducer";
+import { RootState } from "../store";
+
 import Link from "next/link";
-import Image from "next/image";
+import { useState } from "react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardImg,
+  CardText,
+  CardTitle,
+  Col,
+  FormControl,
+  Row,
+} from "react-bootstrap";
+import * as coursesClient from "../courses/client";
+import * as enrollmentsClient from "../enrollments/client";
+import { setEnrollments } from "../enrollments/reducer";
 
 export default function Dashboard() {
+  const { courses } = useSelector((state: RootState) => state.coursesReducer);
+
+  const { currentUser } = useSelector(
+    (state: RootState) => state.accountReducer,
+  ) as any | null;
+
+  const { enrollments } = useSelector(
+    (state: RootState) => state.enrollmentsReducer,
+  );
+
+  const dispatch = useDispatch();
+
+  const [course, setCourse] = useState<any>({
+    _id: "0",
+    name: "New Course",
+    number: "New Number",
+    startDate: "2023-09-10",
+    endDate: "2023-12-15",
+    image: "/images/reactjs.jpg",
+    description: "New Description",
+  });
+
+  const [enrollmentMode, setEnrollmentMode] = useState<boolean>(false);
+
+  const isEnrolled = (userId: string, courseId: string) =>
+    enrollments.some((e: any) => e.user === userId && e.course === courseId);
+
+  // while this method grabs only enrolled courses, it doesn't let me see the enrollments
+  // following my logic, will prob improve in future
+  // const fetchCourses = async () => {
+  //   try {
+  //     const courses = await coursesClient.findMyCourses();
+  //     dispatch(setCourses(courses));
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
+  const onAddNewCourse = async () => {
+    const newCourse = await coursesClient.createCourse(course);
+    dispatch(setCourses([...courses, newCourse]));
+  };
+
+  const onDeleteCourse = async (courseId: string) => {
+    await coursesClient.deleteCourse(courseId);
+    dispatch(setCourses(courses.filter((course) => course._id !== courseId)));
+  };
+
+  const onUpdateCourse = async () => {
+    await coursesClient.updateCourse(course);
+    dispatch(
+      setCourses(
+        courses.map((c) => {
+          if (c._id === course._id) {
+            return course;
+          } else {
+            return c;
+          }
+        }),
+      ),
+    );
+  };
+
+  const onEnroll = async (courseId: string) => {
+    if (!currentUser?._id) return;
+
+    const newEnrollment = await enrollmentsClient.enrollUser(
+      currentUser._id,
+      courseId,
+    );
+    dispatch(setEnrollments([...enrollments, newEnrollment]));
+  };
+
+  const onUnenroll = async (courseId: string) => {
+    if (!currentUser?._id) return;
+
+    await enrollmentsClient.unenrollUser(currentUser._id, courseId);
+
+    dispatch(
+      setEnrollments(
+        enrollments.filter(
+          (e: any) => e.user !== currentUser._id || e.course !== courseId,
+        ),
+      ),
+    );
+  };
+
+  useEffect(() => {
+    const fetchAllCourses = async () => {
+      try {
+        const courses = await coursesClient.fetchAllCourses();
+        dispatch(setCourses(courses));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchEnrollments = async () => {
+      if (!currentUser?._id) return;
+
+      try {
+        const enrollments = await enrollmentsClient.getEnrollments(
+          currentUser._id,
+        );
+        dispatch(setEnrollments(enrollments));
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    fetchAllCourses();
+
+    if (currentUser?._id) {
+      fetchEnrollments();
+    }
+
+    // only re-run when user or callbacks change
+  }, [dispatch, currentUser?._id]);
+
+  console.log(courses, enrollments);
+
   return (
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
-      <h2 id="wd-dashboard-published">Published Courses (12)</h2> <hr />
+      <h5>
+        New Course
+        <Button
+          className={`btn float-end me-2`}
+          id="wd-show-enrollments-click"
+          disabled={!currentUser}
+          onClick={() => setEnrollmentMode(!enrollmentMode)}
+        >
+          {" "}
+          Enrollments{" "}
+        </Button>
+        <Button
+          className="btn btn-warning float-end me-2"
+          onClick={onUpdateCourse}
+          id="wd-update-course-click"
+        >
+          Update{" "}
+        </Button>
+        <Button
+          onClick={onAddNewCourse}
+          className="btn btn-primary float-end me-3"
+          id="wd-add-new-course-click"
+        >
+          Add
+        </Button>
+      </h5>
+      <br />
+      <FormControl
+        value={course.name}
+        onChange={(e) => setCourse({ ...course, name: e.target.value })}
+        className="mb-2"
+      />
+      <FormControl
+        value={course.description}
+        as="textarea"
+        rows={3}
+        onChange={(e) => setCourse({ ...course, description: e.target.value })}
+      />
+      <hr />
+      <h2 id="wd-dashboard-published">
+        Published Courses ({courses.length})
+      </h2>{" "}
+      <hr />
       <div id="wd-dashboard-courses">
-        <div className="wd-dashboard-course">
-          <Link href="/courses/1234" className="wd-dashboard-course-link">
-            <Image
-              src="/images/reactjs.jpg"
-              width={200}
-              height={150}
-              alt="reactjs"
-            />
-            <div>
-              <h5> CS1234 React JS </h5>
-              <p className="wd-dashboard-course-title">
-                Full Stack software developer
-              </p>
-              <button> Go </button>
-            </div>
-          </Link>
-        </div>
-        <div className="wd-dashboard-course">
-          <Link href="/courses/001" className="wd=dashboard-course-link">
-            <Image
-              src="/images/science.jpeg"
-              width={200}
-              height={150}
-              alt="scientific-thinking"
-            />
-              <div>
-                <h5> EEMB1102: Principles of Scientific Thinking </h5>
-                <p className="wd-dashboard-course-title">
-                  Start your journey towards analytical praxis today.
-                </p>
-                <button> Go </button>
-              </div>
-          </Link>
-        </div>
-        <div className="wd-dashboard-course">
-          <Link href="/courses/002" className="wd=dashboard-course-link">
-            <Image
-              src="/images/stock-market.jpeg"
-              width={200}
-              height={150}
-              alt="stock-market"
-            />
-              <div>
-                <h5> ECON5700: Stock Market Simulation </h5>
-                <p className="wd-dashboard-course-title">
-                  Graduate-level Course Requirement
-                </p>
-                <button> Go </button>
-              </div>
-          </Link>
-        </div>
-        <div className="wd-dashboard-course">
-          <Link href="/courses/003" className="wd=dashboard-course-link">
-            <Image
-              src="/images/ancient-phil.jpeg"
-              width={200}
-              height={150}
-              alt="ancient-phil"
-            />
-              <div>
-                <h5> PHIL3329: Recitation for Ancient Philosophy </h5>
-                <p className="wd-dashboard-course-title">
-                  Meeting times TBD.
-                </p>
-                <button> Go </button>
-              </div>
-          </Link>
-        </div>
-        <div className="wd-dashboard-course">
-          <Link href="/courses/004" className="wd=dashboard-course-link">
-            <Image
-              src="/images/storytelling.jpeg"
-              width={200}
-              height={150}
-              alt="storytelling"
-            />
-              <div>
-                <h5> ENGW3000: Advanced Writing for Storytelling </h5>
-                <p className="wd-dashboard-course-title">
-                  Questions? Contact Professor Seuss at seuss@northeastern.edu
-                </p>
-                <button> Go </button>
-              </div>
-          </Link>
-        </div>
-        <div className="wd-dashboard-course">
-          <Link href="/courses/005" className="wd=dashboard-course-link">
-            <Image
-              src="/images/science-lab.jpeg"
-              width={200}
-              height={150}
-              alt="scientific-thinking-lab"
-            />
-              <div>
-                <h5> EEMB1103: Lab for Principles of Scientific Thinking </h5>
-                <p className="wd-dashboard-course-title">
-                  Attendance is MANDATORY. Please don't forget to fill out...
-                </p>
-                <button> Go </button>
-              </div>
-          </Link>
-        </div>
-        <div className="wd-dashboard-course">
-          <Link href="/courses/006" className="wd=dashboard-course-link">
-            <Image
-              src="/images/quantum.jpeg"
-              width={200}
-              height={150}
-              alt="quantum"
-            />
-              <div>
-                <h5> PHYS4003: Quantum Analytics </h5>
-                <p className="wd-dashboard-course-title">
-                  Covers quantum cryptography, quantum algorithms, and its applications.
-                </p>
-                <button> Go </button>
-              </div>
-          </Link>
-        </div>
-        <div className="wd-dashboard-course">
-          <Link href="/courses/007" className="wd=dashboard-course-link">
-            <Image
-              src="/images/anthropology.jpeg"
-              width={200}
-              height={150}
-              alt=""
-            />
-              <div>
-                <h5> SOCL1101: Anthropology for Beginners </h5>
-                <p className="wd-dashboard-course-title">
-                  Start your journey towards qualitative praxis today.
-                </p>
-                <button> Go </button>
-              </div>
-          </Link>
-        </div>
+        <Row xs={1} md={5} className="g-4">
+          {courses
+            .filter((course) =>
+              !currentUser
+                ? true
+                : enrollmentMode
+                  ? true
+                  : enrollments.some(
+                      (enrollment: any) =>
+                        enrollment.user === currentUser?._id &&
+                        enrollment.course === course._id,
+                    ),
+            )
+
+            .map((course: any) => (
+              <Col
+                key={course._id}
+                className="wd-dashboard-course"
+                style={{ width: "300px" }}
+              >
+                <Card>
+                  <Link
+                    onNavigate={(e) => {
+                      if (
+                        !(
+                          currentUser &&
+                          isEnrolled(currentUser?._id, course._id)
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
+                    href={`/courses/${course._id}/home`}
+                    className={`wd-dashboard-course-link text-decoration-none text-dark`}
+                  >
+                    <CardImg
+                      src={`/images/${course.image}` || "images/reactjs.jpg"}
+                      variant="top"
+                      width="100%"
+                      height={160}
+                    />
+                    <CardBody className="card-body">
+                      <CardTitle className="wd-dashboard-course-title text-nowrap overflow-hidden">
+                        {course.name}{" "}
+                      </CardTitle>
+                      <CardText
+                        className="wd-dashboard-course-description overflow-hidden"
+                        style={{ height: "100px" }}
+                      >
+                        {course.description}{" "}
+                      </CardText>
+                      <div className="d-flex text-wrap">
+                        <Button variant="primary"> Go </Button>
+                        <Button
+                          id="wd-edit-course-click"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setCourse(course);
+                          }}
+                          className="btn btn-warning me-2 float-end ms-2"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          className="btn btn-danger float-end"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            onDeleteCourse(course._id);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                      <br />
+                      <div
+                        className="d-flex text-wrap"
+                        hidden={!enrollmentMode}
+                      >
+                        <Button
+                          variant="success"
+                          hidden={
+                            !enrollmentMode || // not in enrollment mode or
+                            isEnrolled(currentUser?._id, course._id)
+                          }
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onEnroll(course._id);
+                          }}
+                        >
+                          {" "}
+                          Enroll{" "}
+                        </Button>
+                        <Button
+                          hidden={
+                            !enrollmentMode || // not in enrollment mode or
+                            !isEnrolled(currentUser?._id, course._id)
+                            // already unenrolled
+                          }
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onUnenroll(course._id);
+                          }}
+                        >
+                          {" "}
+                          Unenroll{" "}
+                        </Button>
+                      </div>
+                    </CardBody>
+                  </Link>
+                </Card>
+              </Col>
+            ))}
+        </Row>
       </div>
     </div>
   );
