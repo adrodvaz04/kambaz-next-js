@@ -1,15 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { assignments } from "@/app/(kambaz)/database";
 import { v4 as uuidv4 } from "uuid";
 
 const initialState = {
-  assignments: assignments,
+  assignments: [],
 };
 
 const assignmentsSlice = createSlice({
   name: "assignments",
   initialState,
   reducers: {
+    // deprecated, using server method
     addAssignment: (state, { payload: assignment }) => {
       const newAssignment: any = {
         _id: uuidv4(),
@@ -19,7 +19,7 @@ const assignmentsSlice = createSlice({
         points: assignment.points,
         dueDate: assignment.dueDate,
         availableFromDate: assignment.availableFromDate,
-        availableUntilDate: assignment.availableUntilDate
+        availableUntilDate: assignment.availableUntilDate,
       };
       state.assignments = [...state.assignments, newAssignment] as any;
     },
@@ -33,8 +33,12 @@ const assignmentsSlice = createSlice({
         a._id === assignment._id ? assignment : a,
       ) as any;
     },
+    setAssignments: (state, action) => {
+      state.assignments = action.payload;
+    },
   },
 });
 
-export const { addAssignment, updateAssignment, deleteAssignment } = assignmentsSlice.actions;
-export default assignmentsSlice.reducer; 
+export const { addAssignment, updateAssignment, deleteAssignment, setAssignments } =
+  assignmentsSlice.actions;
+export default assignmentsSlice.reducer;

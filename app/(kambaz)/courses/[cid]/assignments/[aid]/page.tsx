@@ -12,9 +12,9 @@ import {
   FormSelect,
   Table,
 } from "react-bootstrap";
-
+import * as client from "./client";
 import { useSelector, useDispatch } from "react-redux";
-import { addAssignment, updateAssignment } from "../reducer";
+import { addAssignment, setAssignments, updateAssignment } from "../reducer";
 import { RootState } from "../../../../store";
 
 export default function AssignmentEditor() {
@@ -47,12 +47,14 @@ export default function AssignmentEditor() {
     redirect("../assignments");
   };
 
-  const onSave = () => {
+  const onSave = async () => {
     // if new assignment
     if (assignment._id === "new") {
-      dispatch(addAssignment(assignment));
+      const newAssignment = await client.createAssignment(assignment);
+      dispatch(setAssignments([...assignments, newAssignment]));
     } else {
-      dispatch(updateAssignment(assignment));
+      const updatedAssignment = await client.updateAssignment(assignment);
+      dispatch(updateAssignment(updatedAssignment));
     }
     onRedirect();
   };

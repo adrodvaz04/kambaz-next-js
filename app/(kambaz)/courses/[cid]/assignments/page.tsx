@@ -16,10 +16,12 @@ import { FaMagnifyingGlass, FaTrash } from "react-icons/fa6";
 import { MdOutlineAssignment } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import LessonControlButtons from "../modules/LessonControlButtons";
-import { deleteAssignment } from "./reducer";
 
-import { useState } from "react";
+import * as client from "./[aid]/client";
+
+import { useEffect, useState } from "react";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import { setAssignments } from "./reducer";
 
 export default function Assignments() {
   const { cid } = useParams();
@@ -27,14 +29,27 @@ export default function Assignments() {
   const { assignments } = useSelector(
     (state: RootState) => state.assignmentsReducer,
   );
+
+  const fetchAssignments = async () => {
+    const retrievedAssignments = await client.getAssignmentsByCourse(cid as string);
+    dispatch(setAssignments(retrievedAssignments));
+  };
+
   const dispatch = useDispatch();
 
-  const [assignmentToDelete, setAssignmentToDelete] = useState<
-    string | undefined
-  >(undefined);
-  const handleClose = () => setAssignmentToDelete(undefined);
-  const handleShow = (assignmentId: string) =>
-    setAssignmentToDelete(assignmentId);
+  const [aidToDelete, setAidToDelete] = useState<string | undefined>(undefined);
+
+  const handleClose = () => setAidToDelete(undefined);
+  const handleShow = (assignmentId: string) => setAidToDelete(assignmentId);
+
+  const onAssignmentDelete = async () => {
+    await client.deleteAssignment(aidToDelete as string);
+    dispatch(setAssignments(assignments.filter((a) => a._id !== aidToDelete)));
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  });
 
   return (
     <div id="wd-assignments" className="me-2">
@@ -99,7 +114,7 @@ export default function Assignments() {
           {assignments
             .filter((assignment: any) => assignment.course === cid)
             .map((assignment: any) => (
-              <ListGroup className="rounded-0">
+              <ListGroup className="rounded-0" key={assignment._id}>
                 <ListGroupItem className="wd-lesson p-3 ps-1 d-flex">
                   <div className="d-flex pt-3 pe-2">
                     <BsGripVertical className="me-2 fs-3" />
@@ -130,9 +145,9 @@ export default function Assignments() {
         </ListGroupItem>
       </ListGroup>
       <DeleteConfirmModal
-        show={assignmentToDelete !== undefined}
+        show={aidToDelete !== undefined}
         handleClose={handleClose}
-        deleteOperation={() => dispatch(deleteAssignment(assignmentToDelete))}
+        deleteOperation={onAssignmentDelete}
         dialogTitle={"Delete Assignment"}
         bodyText={"Are you sure you want to delete this assignment?"}
       ></DeleteConfirmModal>

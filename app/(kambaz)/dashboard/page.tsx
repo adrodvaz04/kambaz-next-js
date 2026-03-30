@@ -1,39 +1,37 @@
 "use client";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  addNewCourse,
-  deleteCourse,
-  updateCourse,
-  setCourses,
-} from "../courses/reducer";
+import { setCourses } from "../courses/reducer";
 import { RootState } from "../store";
 
-import { FormControl } from "react-bootstrap";
 import Link from "next/link";
-import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
 import {
-  Row,
-  Col,
-  Card,
-  CardImg,
-  CardBody,
-  CardTitle,
-  CardText,
   Button,
+  Card,
+  CardBody,
+  CardImg,
+  CardText,
+  CardTitle,
+  Col,
+  FormControl,
+  Row,
 } from "react-bootstrap";
-import { enroll, unenroll } from "../enrollments/reducer";
-import * as client from "../courses/client";
+import * as coursesClient from "../courses/client";
+import * as enrollmentsClient from "../enrollments/client";
+import { setEnrollments } from "../enrollments/reducer";
 
 export default function Dashboard() {
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
+
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer,
   ) as any | null;
+
   const { enrollments } = useSelector(
     (state: RootState) => state.enrollmentsReducer,
   );
+
   const dispatch = useDispatch();
 
   const [course, setCourse] = useState<any>({
@@ -49,29 +47,31 @@ export default function Dashboard() {
   const [enrollmentMode, setEnrollmentMode] = useState<boolean>(false);
 
   const isEnrolled = (userId: string, courseId: string) =>
-    enrollments.some((e) => e.user === userId && e.course === courseId);
+    enrollments.some((e: any) => e.user === userId && e.course === courseId);
 
-  const fetchCourses = async () => {
-    try {
-      const courses = await client.findMyCourses();
-      dispatch(setCourses(courses));
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // while this method grabs only enrolled courses, it doesn't let me see the enrollments
+  // following my logic, will prob improve in future
+  // const fetchCourses = async () => {
+  //   try {
+  //     const courses = await coursesClient.findMyCourses();
+  //     dispatch(setCourses(courses));
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const onAddNewCourse = async () => {
-    const newCourse = await client.createCourse(course);
+    const newCourse = await coursesClient.createCourse(course);
     dispatch(setCourses([...courses, newCourse]));
   };
 
   const onDeleteCourse = async (courseId: string) => {
-    const status = await client.deleteCourse(courseId);
+    await coursesClient.deleteCourse(courseId);
     dispatch(setCourses(courses.filter((course) => course._id !== courseId)));
   };
 
   const onUpdateCourse = async () => {
-    await client.updateCourse(course);
+    await coursesClient.updateCourse(course);
     dispatch(
       setCourses(
         courses.map((c) => {
@@ -85,9 +85,63 @@ export default function Dashboard() {
     );
   };
 
+  const onEnroll = async (courseId: string) => {
+    if (!currentUser?._id) return;
+
+    const newEnrollment = await enrollmentsClient.enrollUser(
+      currentUser._id,
+      courseId,
+    );
+    dispatch(setEnrollments([...enrollments, newEnrollment]));
+  };
+
+  const onUnenroll = async (courseId: string) => {
+    if (!currentUser?._id) return;
+
+    await enrollmentsClient.unenrollUser(currentUser._id, courseId);
+
+    dispatch(
+      setEnrollments(
+        enrollments.filter(
+          (e: any) => e.user !== currentUser._id || e.course !== courseId,
+        ),
+      ),
+    );
+  };
+
   useEffect(() => {
-    fetchCourses();
-  }, [currentUser]);
+    const fetchAllCourses = async () => {
+      try {
+        const courses = await coursesClient.fetchAllCourses();
+        dispatch(setCourses(courses));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchEnrollments = async () => {
+      if (!currentUser?._id) return;
+
+      try {
+        const enrollments = await enrollmentsClient.getEnrollments(
+          currentUser._id,
+        );
+        dispatch(setEnrollments(enrollments));
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    fetchAllCourses();
+
+    if (currentUser?._id) {
+      fetchEnrollments();
+    }
+
+    // only re-run when user or callbacks change
+  }, [dispatch, currentUser?._id]);
+
+  console.log(courses, enrollments);
 
   return (
     <div id="wd-dashboard">
@@ -98,7 +152,7 @@ export default function Dashboard() {
           className={`btn float-end me-2`}
           id="wd-show-enrollments-click"
           disabled={!currentUser}
-          onClick={(e) => setEnrollmentMode(!enrollmentMode)}
+          onClick={() => setEnrollmentMode(!enrollmentMode)}
         >
           {" "}
           Enrollments{" "}
@@ -144,7 +198,7 @@ export default function Dashboard() {
                 : enrollmentMode
                   ? true
                   : enrollments.some(
-                      (enrollment) =>
+                      (enrollment: any) =>
                         enrollment.user === currentUser?._id &&
                         enrollment.course === course._id,
                     ),
@@ -222,12 +276,7 @@ export default function Dashboard() {
                           }
                           onClick={(e) => {
                             e.preventDefault();
-                            dispatch(
-                              enroll({
-                                user: currentUser?._id,
-                                course: course._id,
-                              }),
-                            );
+                            onEnroll(course._id);
                           }}
                         >
                           {" "}
@@ -241,12 +290,7 @@ export default function Dashboard() {
                           }
                           onClick={(e) => {
                             e.preventDefault();
-                            dispatch(
-                              unenroll({
-                                user: currentUser?._id,
-                                course: course._id,
-                              }),
-                            );
+                            onUnenroll(course._id);
                           }}
                         >
                           {" "}

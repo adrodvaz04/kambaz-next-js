@@ -10,6 +10,8 @@ const modulesSlice = createSlice({
     setModules: (state, action) => {
       state.modules = action.payload;
     },
+
+    // deprecated, using server methods
     addModule: (state, { payload: module }) => {
       const newModule: any = {
         _id: uuidv4(),
@@ -19,6 +21,7 @@ const modulesSlice = createSlice({
       };
       state.modules = [...state.modules, newModule] as any;
     },
+    
     deleteModule: (state, { payload: moduleId }) => {
       state.modules = state.modules.filter(
         (m: any) => m._id !== moduleId);

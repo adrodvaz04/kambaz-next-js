@@ -19,7 +19,6 @@ const TODOS_API = `${HTTP_SERVER}/lab5/todos`;
 
 export const fetchTodos = async () => {
   const response = await axios.get(`${HTTP_SERVER}/lab5/todos`);
-  console.log(response.data);
   return response.data;
 };
 

@@ -3,7 +3,6 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
-import { v4 as uuidv4 } from "uuid";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./modulesControls";
@@ -82,11 +81,11 @@ export default function Modules() {
                 <FormControl
                   className="w-50 d-inline-block"
                   onChange={(e) =>
-                    dispatch(updateModule({ ...module, name: e.target.value }))
+                    setModuleName(e.target.value)
                   }
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      onUpdateModule({ ...module, editing: false });
+                      onUpdateModule({ ...module, name: moduleName, editing: false });
                     }
                   }}
                   defaultValue={module.name}
