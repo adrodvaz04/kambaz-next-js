@@ -40,7 +40,7 @@ export default function AssignmentEditor() {
           availableFromDate: formattedDate,
           availableUntilDate: formattedDate,
         }
-      : assignments.filter((a) => a._id === aid)[0] || undefined,
+      : assignments.filter((a: any) => a._id === aid)[0] || undefined,
   );
 
   const onRedirect = () => {

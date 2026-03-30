@@ -44,7 +44,7 @@ export default function Assignments() {
 
   const onAssignmentDelete = async () => {
     await client.deleteAssignment(aidToDelete as string);
-    dispatch(setAssignments(assignments.filter((a) => a._id !== aidToDelete)));
+    dispatch(setAssignments(assignments.filter((a: any) => a._id !== aidToDelete)));
   };
 
   useEffect(() => {
