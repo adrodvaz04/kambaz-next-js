@@ -37,3 +37,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 
 **This is the branch for the final project, working with madison seal**
+
+this is from madison laptop
