@@ -14,7 +14,7 @@ import {
 } from "react-bootstrap";
 import * as client from "./client";
 import { useSelector, useDispatch } from "react-redux";
-import { addAssignment, setAssignments, updateAssignment } from "../reducer";
+import { setAssignments, updateAssignment } from "../reducer";
 import { RootState } from "../../../../store";
 
 export default function AssignmentEditor() {

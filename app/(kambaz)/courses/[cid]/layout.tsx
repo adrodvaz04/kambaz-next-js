@@ -3,7 +3,6 @@
 import { ReactNode, useState } from "react";
 import CourseNavigation from "./navigation";
 import { FaAlignJustify } from "react-icons/fa";
-import { courses } from "../../database";
 import Breadcrumb from "./Breadcrumb";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
@@ -17,12 +16,12 @@ export default function CoursesLayout({
   const [hideNavBar, setHideNavbar] = useState<boolean>(false);
   const { cid } = useParams();
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
-  const course = courses.find((course) => course._id === cid);
+  const course = courses.find((c) => (c as any)._id === cid);
   return (
     <div id="wd-courses">
       <h2 className="text-black">
         <FaAlignJustify className="me-4 fs-4 mb-1" onClick={() => setHideNavbar(!hideNavBar)}/>
-        <Breadcrumb courseName={course?.name} />
+        <Breadcrumb courseName={(course as any).name} />
       </h2>
       <hr />
       <div className="d-flex">

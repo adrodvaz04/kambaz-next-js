@@ -112,7 +112,6 @@ export default function Assignments() {
           </div>
 
           {assignments
-            .filter((assignment: any) => assignment.course === cid)
             .map((assignment: any) => (
               <ListGroup className="rounded-0" key={assignment._id}>
                 <ListGroupItem className="wd-lesson p-3 ps-1 d-flex">
