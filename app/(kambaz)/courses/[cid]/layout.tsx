@@ -3,7 +3,6 @@
 import { ReactNode, useState } from "react";
 import CourseNavigation from "./navigation";
 import { FaAlignJustify } from "react-icons/fa";
-import { courses } from "../../database";
 import Breadcrumb from "./Breadcrumb";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
