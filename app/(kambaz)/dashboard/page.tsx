@@ -88,7 +88,7 @@ export default function Dashboard() {
 
   const onDeleteCourse = async (courseId: string) => {
     await coursesClient.deleteCourse(courseId);
-    dispatch(setCourses(courses.filter((course) => course._id !== courseId)));
+    dispatch(setCourses(courses.filter((course) => (course as any)._id !== courseId)));
   };
 
   const onUpdateCourse = async () => {
@@ -96,7 +96,7 @@ export default function Dashboard() {
     dispatch(
       setCourses(
         courses.map((c) => {
-          if (c._id === course._id) {
+          if ((c as any)._id === course._id) {
             return course;
           } else {
             return c;
@@ -188,7 +188,7 @@ export default function Dashboard() {
                 <Link
                   onNavigate={(e) => {
                     if (
-                      !(currentUser && isEnrolled(currentUser?._id, course._id))
+                      !(currentUser && isEnrolled(course._id))
                     ) {
                       e.preventDefault();
                     }

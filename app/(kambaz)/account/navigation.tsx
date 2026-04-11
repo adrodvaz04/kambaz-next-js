@@ -19,8 +19,8 @@ export default function AccountNavigation() {
           </NavLink>{" "}
         </NavItem>
       ))}
-      {currentUser && currentUser.role === "ADMIN" && (
         <NavLink
+          hidden={!currentUser || (currentUser as any).role !== "ADMIN"}
           as={Link}
           href={`/account/users`}
           active={pathname.endsWith("users")}
@@ -28,7 +28,6 @@ export default function AccountNavigation() {
           {" "}
           users{" "}
         </NavLink>
-      )}
     </Nav>
   );
 }
