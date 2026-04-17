@@ -21,7 +21,7 @@ export default function CoursesLayout({
     <div id="wd-courses">
       <h2 className="text-black">
         <FaAlignJustify className="me-4 fs-4 mb-1" onClick={() => setHideNavbar(!hideNavBar)}/>
-        <Breadcrumb courseName={(course as any).name} />
+        <Breadcrumb courseName={course ? (course as any).name : "Course"} />
       </h2>
       <hr />
       <div className="d-flex">

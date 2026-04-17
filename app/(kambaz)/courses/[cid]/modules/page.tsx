@@ -1,21 +1,18 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import * as client from "../../client";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./modulesControls";
-import * as client from "../../client";
 import {
-  addModule,
-  deleteModule,
   editModule,
-  updateModule,
   setModules,
 } from "./reducer";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../../store";
 
 export default function Modules() {
   const { cid } = useParams();
