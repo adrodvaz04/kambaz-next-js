@@ -1,33 +1,30 @@
 "use client";
 
-import { redirect, useParams } from "next/navigation";
-import { Button, Modal, Offcanvas, Overlay, Row } from "react-bootstrap";
-import * as quizzesClient from "../client";
-import { useEffect, useState } from "react";
-import { Quiz } from "../types";
+import { redirect } from "next/navigation";
+import { useState } from "react";
+import { Button, Offcanvas, Row } from "react-bootstrap";
 import DeleteConfirmModal from "../../assignments/DeleteConfirmModal";
+import { Quiz } from "../types";
 
 export default function QuizContextModal({
   quiz,
   show,
-  onClose,
+  onCloseAction,
   onQuizDeleteAction,
   onQuizPublishAction,
 }: {
   quiz: Quiz;
   show: boolean;
-  onClose: () => void;
-  onQuizUpdateAction: () => void;
+  onCloseAction: () => void;
   onQuizDeleteAction: (quizId: string) => void;
   onQuizPublishAction: () => void;
 }) {
-  const { cid, qid } = useParams();
   const [quizIdToDelete, setQuizIdToDelete] = useState<string | undefined>(
     undefined,
   );
 
   return (
-    <Offcanvas show={show} onHide={onClose} placement="end">
+    <Offcanvas show={show} onHide={onCloseAction} placement="end">
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>
           <span className="fs-2"> Options </span>
@@ -42,7 +39,7 @@ export default function QuizContextModal({
             variant={quiz.published ? "secondary" : "success"}
             onClick={() => {
               onQuizPublishAction();
-              onClose();
+              onCloseAction();
             }}
           >
             {" "}
@@ -72,7 +69,7 @@ export default function QuizContextModal({
         show={quizIdToDelete !== undefined}
         handleClose={() => {
           setQuizIdToDelete(undefined);
-          onClose();
+          onCloseAction();
         }}
         deleteOperation={() => onQuizDeleteAction(quiz._id as string)}
         dialogTitle={`Delete Quiz`}

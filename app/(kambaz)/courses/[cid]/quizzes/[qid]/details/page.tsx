@@ -13,59 +13,106 @@ export default function QuizEditor() {
   const { cid, qid } = useParams();
   const dispatch = useDispatch();
 
-  const newQuiz = usePathname().endsWith("new");
-
+  const newQuiz = usePathname().endsWith("new/details");
   const { quizzes } = useSelector((state: RootState) => state.quizzesReducer);
 
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer,
   ) as any | null;
 
-  const [quiz, setQuiz] = useState<Quiz>({
-    _id: "id",
-    title: "Quiz Title",
-    userId: currentUser._id,
-    course: cid as string,
-    availableFrom: new Date(),
-    availableUntil: new Date(),
-    dueDate: new Date(),
-    points: 0,
-    published: true,
-    quizType: QuizType.GRADED_QUIZ,
-    assignment_group: AssignmentGroup.QUIZZES,
-    shuffle_answers: false,
-    time_limit_mins: 0,
-    multiple_attempts: true,
-    max_attempts: 1,
-    show_correct_answers: true,
-    access_code: "access code here...",
-    one_question_at_a_time: true,
-    webcam_required: true,
-    lock_questions: true,
-    questions: [],
-  });
+  // set with a new quiz object
+  const [quiz, setQuiz] = useState<Quiz>(
+    newQuiz
+      ? {
+          _id: "id",
+          title: "Quiz Title",
+          userId: currentUser ? currentUser._id : "",
+          course: cid as string,
+          availableFrom: new Date(),
+          availableUntil: new Date(),
+          dueDate: new Date(),
+          points: 0,
+          published: true,
+          quizType: QuizType.GRADED_QUIZ,
+          assignment_group: AssignmentGroup.QUIZZES,
+          shuffle_answers: false,
+          time_limit_mins: 0,
+          multiple_attempts: true,
+          max_attempts: 1,
+          show_correct_answers: true,
+          access_code: "access code here...",
+          one_question_at_a_time: true,
+          webcam_required: true,
+          lock_questions: true,
+          questions: [],
+        }
+      : {
+          // if not new quiz, retrieve from reducer and reformat dates
+          ...quizzes.filter((q) => q._id === qid)[0],
+          dueDate: quizzes.filter((q) => q._id === qid)[0]?.dueDate
+            ? new Date(quizzes.filter((q) => q._id === qid)[0].dueDate)
+            : new Date(),
+          availableFrom: quizzes.filter((q) => q._id === qid)[0]?.availableFrom
+            ? new Date(quizzes.filter((q) => q._id === qid)[0].availableFrom)
+            : new Date(),
+          availableUntil: quizzes.filter((q) => q._id === qid)[0]
+            ?.availableUntil
+            ? new Date(quizzes.filter((q) => q._id === qid)[0].availableUntil)
+            : new Date(),
+        },
+  );
 
   useEffect(() => {
-    const fetchQuiz = async (quizId: string) => {
-      const quiz: Quiz = await quizzesClient.getQuizById(quizId);
-      setQuiz(quiz);
-    };
-
-    fetchQuiz(qid as string);
-  }, [qid, quiz, currentUser]);
+    if (!newQuiz && quizzes.length > 0) {
+      const selectedQuiz = quizzes.find((q) => q._id === qid);
+      if (selectedQuiz) {
+        setQuiz({
+          ...selectedQuiz,
+          // format dates for reducer
+          dueDate: selectedQuiz.dueDate
+            ? new Date(selectedQuiz.dueDate)
+            : new Date(),
+          availableFrom: selectedQuiz.availableFrom
+            ? new Date(selectedQuiz.availableFrom)
+            : new Date(),
+          availableUntil: selectedQuiz.availableUntil
+            ? new Date(selectedQuiz.availableUntil)
+            : new Date(),
+        });
+      }
+    }
+  }, [qid, quizzes, newQuiz]);
 
   const onTakeQuiz = () => {
     redirect("./take-quiz");
   };
 
   const onSaveQuiz = async () => {
+    const quizToSave = {
+      ...quiz,
+      dueDate:
+        quiz.dueDate instanceof Date
+          ? quiz.dueDate.toISOString()
+          : quiz.dueDate,
+      availableFrom:
+        quiz.availableFrom instanceof Date
+          ? quiz.availableFrom.toISOString()
+          : quiz.availableFrom,
+      availableUntil:
+        quiz.availableUntil instanceof Date
+          ? quiz.availableUntil.toISOString()
+          : quiz.availableUntil,
+    };
+
     if (newQuiz) {
-      const newQuiz = await quizzesClient.createQuiz(quiz);
-      dispatch(setQuizzes([...quizzes, newQuiz]));
+      const newQuizData = await quizzesClient.createQuiz(quizToSave);
+      dispatch(setQuizzes([...quizzes, newQuizData]));
     } else {
-      await quizzesClient.updateQuiz(quiz);
+      const updatedQuiz = await quizzesClient.updateQuiz(quizToSave);
       dispatch(
-        setQuizzes(quizzes.map((q: Quiz) => (q._id === quiz._id ? quiz : q))),
+        setQuizzes(
+          quizzes.map((q: Quiz) => (q._id === quiz._id ? updatedQuiz : q)),
+        ),
       );
     }
     redirect("../");
@@ -75,7 +122,7 @@ export default function QuizEditor() {
     redirect("../");
   };
 
-  return (
+  return currentUser && currentUser.role === "FACULTY" ? (
     <div id="quiz-editor">
       <FormControl
         defaultValue={quiz.title}
@@ -288,7 +335,6 @@ export default function QuizEditor() {
                 />
               </td>
             </tr>
-            <hr />
             <tr>
               <td>
                 <FormLabel> Due Date </FormLabel>
@@ -296,7 +342,11 @@ export default function QuizEditor() {
               <td>
                 <FormControl
                   size="lg"
-                  defaultValue={quiz.dueDate.toISOString().substring(0, 10)}
+                  defaultValue={
+                    quiz?.dueDate
+                      ? quiz.dueDate.toISOString().substring(0, 10)
+                      : ""
+                  }
                   type={"date"}
                   onChange={(e) =>
                     setQuiz({ ...quiz, dueDate: new Date(e.target.value) })
@@ -312,9 +362,11 @@ export default function QuizEditor() {
                 <FormControl
                   size="lg"
                   type={"date"}
-                  defaultValue={quiz.availableFrom
-                    .toISOString()
-                    .substring(0, 10)}
+                  defaultValue={
+                    quiz?.availableFrom
+                      ? quiz.availableFrom.toISOString().substring(0, 10)
+                      : ""
+                  }
                   onChange={(e) =>
                     setQuiz({
                       ...quiz,
@@ -331,9 +383,11 @@ export default function QuizEditor() {
               <td>
                 <FormControl
                   size="lg"
-                  defaultValue={quiz.availableUntil
-                    .toISOString()
-                    .substring(0, 10)}
+                  defaultValue={
+                    quiz?.availableUntil
+                      ? quiz.availableUntil.toISOString().substring(0, 10)
+                      : ""
+                  }
                   type={"date"}
                   onChange={(e) =>
                     setQuiz({
@@ -364,7 +418,7 @@ export default function QuizEditor() {
             variant="primary"
           >
             {" "}
-            Save {newQuiz ? "Changes" : ""}{" "}
+            Save {newQuiz ? "" : "Changes"}{" "}
           </Button>
           <Button
             className="mx-2"
@@ -378,5 +432,7 @@ export default function QuizEditor() {
         </div>
       </Form>
     </div>
+  ) : (
+    <div> hi not allowed </div>
   );
 }

@@ -48,8 +48,9 @@ export default function Quizzes() {
   ];
 
   const { cid } = useParams();
-  //   const { quizzes } = useSelector((state: RootState) => state.quizzesReducer);
-  const quizzes = testQuizzes;
+  const { quizzes = [] } = useSelector(
+    (state: RootState) => state.quizzesReducer,
+  );
 
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer,
@@ -61,35 +62,34 @@ export default function Quizzes() {
 
   useEffect(() => {
     const fetchQuizzes = async (cid: string) => {
-      let quizzes: object[];
-      if (currentUser && currentUser.role === "FACULTY") {
-        quizzes = await quizzesClient.getQuizzesByCourse(cid, false);
-      } else {
-        quizzes = await quizzesClient.getQuizzesByCourse(cid, true);
+      try {
+        let quizzesData: Quiz[];
+        if (currentUser && currentUser.role === "FACULTY") {
+          quizzesData = await quizzesClient.getQuizzesByCourse(cid, false);
+        } else {
+          quizzesData = await quizzesClient.getQuizzesByCourse(cid, true);
+        }
+        // Ensure quizzesData is always an array (keep dates as strings for Redux serialization)
+        const validQuizzes = Array.isArray(quizzesData) ? quizzesData : [];
+        dispatch(setQuizzes(validQuizzes));
+      } catch (error) {
+        console.error("Error fetching quizzes:", error);
+        dispatch(setQuizzes([]));
       }
-      dispatch(setQuizzes(quizzes));
     };
-
     fetchQuizzes(cid as string);
-  }, [dispatch, currentUser, cid, quizzes]);
+  }, [dispatch, currentUser, cid]);
 
   const onQuizDelete = async (quizId: string) => {
-    await quizzesClient.deleteQuiz(quizId);
-    dispatch(setQuizzes(quizzes.filter((q: Quiz) => q._id !== quizId)));
-  };
-
-  const onQuizUpdate = async (quiz: Quiz) => {
-    const updatedQuiz = await quizzesClient.updateQuiz(quiz);
-    dispatch(
-      setQuizzes(
-        quizzes.map((q: Quiz) => (q._id === quiz._id ? updatedQuiz : q)),
-      ),
-    );
+    const deletedQuiz = await quizzesClient.deleteQuiz(quizId);
+    dispatch(setQuizzes(quizzes.filter((q: Quiz) => q._id !== deletedQuiz._id)));
   };
 
   const onNewQuizClick = () => {
     redirect("./quizzes/new");
   };
+
+  console.log(quizzes);
 
   return (
     <div id="quizzes-view">
@@ -175,7 +175,7 @@ export default function Quizzes() {
                         <br />
                         <span className="fs-5">
                           {" "}
-                          <b>Due</b> {q.dueDate.toDateString()} |{" "}
+                          <b>Due</b> {new Date(q.dueDate).toDateString()} |{" "}
                           {q.points.toString()} pts | {q.questions.length}{" "}
                           Questions
                         </span>
@@ -184,9 +184,8 @@ export default function Quizzes() {
                     <QuizContextModal
                       quiz={q}
                       show={quizToEdit !== undefined}
-                      onClose={() => setQuizToEdit(undefined)}
-                      onQuizUpdateAction={() => onQuizUpdate}
-                      onQuizDeleteAction={() => onQuizDelete}
+                      onCloseAction={() => setQuizToEdit(undefined)}
+                      onQuizDeleteAction={onQuizDelete}
                       onQuizPublishAction={async () => {
                         await quizzesClient.updateQuiz({
                           ...q,

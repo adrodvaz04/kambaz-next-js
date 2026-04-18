@@ -10,28 +10,30 @@ export const getQuizzesByCourse = async (
   onlyPublished: boolean,
 ) => {
   const { data } = await axios.get(
-    `${QUIZZES_API}/course/${courseId}${onlyPublished ? "?published=true" : ""}`,
+    `${QUIZZES_API}?courseId=${courseId}${onlyPublished ? "&published=true" : ""}`,
   );
   return data;
 };
 
-export const getQuizzesByUser = async () => {
-  const { data } = await axiosWithCredentials.get(QUIZZES_API);
+export const getQuizzesByUser = async (userId: string) => {
+  const { data } = await axiosWithCredentials.get(
+    `${QUIZZES_API}?userId=${userId}`,
+  );
   return data;
 };
 
-export const getQuizById = async(quizId: string) => {
-  const {data} = await axios.get(`${QUIZZES_API}/${quizId}`);
+export const getQuizById = async (quizId: string) => {
+  const { data } = await axios.get(`${QUIZZES_API}/${quizId}`);
   return data;
-}
+};
 
 export const createQuiz = async (quiz: object) => {
-  const { data } = await axiosWithCredentials.post(QUIZZES_API, quiz);
+  const { data } = await axiosWithCredentials.post(QUIZZES_API, {quiz: quiz});
   return data;
 };
 
 export const updateQuiz = async (quiz: object) => {
-  const { data } = await axios.put(QUIZZES_API, quiz);
+  const { data } = await axios.put(QUIZZES_API, {updates: quiz});
   return data;
 };
 
@@ -43,7 +45,7 @@ export const deleteQuiz = async (quizId: string) => {
 export const addQuizAttempt = async (quizId: string, attempt: object) => {
   const { data } = await axiosWithCredentials.post(
     `${QUIZZES_API}/${quizId}/attempts`,
-    attempt,
+    {attempt: attempt},
   );
   return data;
 };

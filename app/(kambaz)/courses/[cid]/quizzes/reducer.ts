@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { Quiz } from "./types";
 
-const initialState = {
+const initialState: { quizzes: Quiz[] } = {
   quizzes: [],
 };
 
@@ -12,17 +13,12 @@ const quizzesSlice = createSlice({
       state.quizzes = action.payload;
     },
     updateQuiz: (state, { payload: quiz }) => {
-      state.quizzes = state.quizzes.map((q: any) =>
+      state.quizzes = state.quizzes.map((q: Quiz) =>
         q._id === quiz._id ? quiz : q,
-      ) as any;
-    },
-    editQuiz: (state, { payload: quizId }) => {
-      state.quizzes = state.quizzes.map((q: any) =>
-        q._id === quizId ? { ...q, editing: true } : q,
-      ) as any;
+      ) as Quiz[];
     },
   },
 });
 
-export const { setQuizzes, updateQuiz, editQuiz } = quizzesSlice.actions;
+export const { setQuizzes, updateQuiz } = quizzesSlice.actions;
 export default quizzesSlice.reducer;
