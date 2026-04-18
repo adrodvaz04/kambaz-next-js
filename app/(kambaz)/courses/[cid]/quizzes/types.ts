@@ -40,13 +40,22 @@ export type Quiz = {
   one_question_at_a_time: boolean;
   webcam_required: boolean;
   lock_questions: boolean;
-  questions: {
-    title: string;
-    questionType: QuestionType;
-    points: number;
-    question: string;
-    answers: string[];
-  }[];
+  questions: QuizQuestion[];
+};
+
+export type QuizQuestion = {
+  _id: string;
+  title: string;
+  questionType: QuestionType;
+  points: number;
+  question: string;
+  answers: Answer[];
+};
+
+export type Answer = {
+  _id: string;
+  text: string;
+  correct: boolean;
 };
 
 export type QuizAttempt = {
