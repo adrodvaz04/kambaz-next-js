@@ -1,21 +1,21 @@
 enum QuizType {
-  "graded-quiz",
-  "practice-quiz",
-  "graded-survey",
-  "ungraded-survey",
+  GRADED_QUIZ = "Graded Quiz",
+  PRACTICE_QUIZ = "Practice Quiz",
+  GRADED_SURVEY = "Graded Survey",
+  UNGRADED_SURVEY = "Ungraded Survey",
 }
 
 enum AssignmentGroup {
-  "Quizzes",
-  "Exams",
-  "Assignments",
-  "Projects",
+  QUIZZES = "Quizzes",
+  EXAMS = "Exams",
+  ASSIGNMENTS = "Assignments",
+  PROJECTS = "Projects",
 }
 
 enum QuestionType {
-  "true-false",
-  "multiple-choice",
-  "fill-in-blank",
+  TRUE_FALSE = "True/False",
+  MULTIPLE_CHOICE = "Multiple Choice",
+  FILL_IN_BLANK = "Fill-in-the-blank",
 }
 
 export type Quiz = {
@@ -31,9 +31,11 @@ export type Quiz = {
   // quiz details
   quizType: QuizType;
   assignment_group: AssignmentGroup;
+  shuffle_answers: boolean;
   time_limit_mins: number;
   multiple_attempts: boolean;
   max_attempts: number;
+  show_correct_answers: boolean;
   access_code: string;
   one_question_at_a_time: boolean;
   webcam_required: boolean;

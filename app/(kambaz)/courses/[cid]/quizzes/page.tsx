@@ -32,11 +32,13 @@ export default function Quizzes() {
       dueDate: new Date(),
       points: 123,
       published: true,
-      quizType: QuizType["graded-quiz"],
-      assignment_group: AssignmentGroup["Quizzes"],
+      quizType: QuizType.GRADED_QUIZ,
+      assignment_group: AssignmentGroup.QUIZZES,
+      shuffle_answers: false,
       time_limit_mins: 123,
       multiple_attempts: true,
       max_attempts: 21,
+      show_correct_answers: true,
       access_code: "string",
       one_question_at_a_time: true,
       webcam_required: true,
@@ -131,16 +133,14 @@ export default function Quizzes() {
       {/* hardcoded splice for only string values*/}
       {Object.values(AssignmentGroup)
         .splice(0, 4)
-        .map((group: string | AssignmentGroup) => (
+        .map((group: string) => (
           <div key={group} className="">
             <ListGroup className="my-3 pb-3 rounded-0">
               <ListGroupItem>
-                <span className="fs-3 fw-bold"> {group} </span>
+                <span className="fs-4 fw-bold"> {group} </span>
               </ListGroupItem>
               {quizzes
-                .filter(
-                  (q: Quiz) => AssignmentGroup[q.assignment_group] === group,
-                )
+                .filter((q: Quiz) => q.assignment_group === group)
                 .map((q: Quiz) => (
                   <div key={q._id} className="size-fit">
                     <ListGroupItem className="py-2">
