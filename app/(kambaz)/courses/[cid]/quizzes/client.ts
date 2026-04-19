@@ -26,7 +26,8 @@ export const getQuizzesByUser = async (userId: string) => {
 };
 
 export const getQuizById = async (quizId: string) => {
-  const { data } = await axios.get(`${QUIZZES_API}/${quizId}`);
+  const { data } = await axios.get(`${QUIZZES_API}/${quizId}`,
+  );
   return data;
 };
 
