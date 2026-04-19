@@ -21,11 +21,13 @@ export default function QuestionEditor({
     if (question.answers.length == 0) {
       return setWarning("Please include at least one answer.");
     } else if (!question.answers.some((a) => a.correct)) {
-      return setWarning("Please set at least one correct question.");
+      return setWarning("Please set at least one correct answer.");
     } else if (
       question.answers.some((a) => a.correct && a.text.trim() === "")
     ) {
       return setWarning("Please ensure your correct answer is not empty text.");
+    } else if (question.question.trim() === "") {
+      return setWarning("Please enter a question.");
     }
 
     setWarning(undefined);
@@ -179,6 +181,7 @@ export default function QuestionEditor({
               variant="primary"
               size="lg"
               hidden={question.questionType === QuestionType.TRUE_FALSE}
+              disabled={question.questionType === QuestionType.TRUE_FALSE}
               onClick={onNewAnswer}
             >
               <FaPlus></FaPlus>

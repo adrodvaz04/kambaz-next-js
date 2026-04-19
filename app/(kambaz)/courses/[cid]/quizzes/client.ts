@@ -1,4 +1,5 @@
 import axios from "axios";
+import { QuizAttempt } from "./types";
 const axiosWithCredentials = axios.create({ withCredentials: true });
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
@@ -11,7 +12,7 @@ export const getQuizzesByCourse = async (
 ) => {
   const { data } = await axios.get(
     `${QUIZZES_API}?courseId=${courseId}${onlyPublished ? "&published=true" : ""}`,
-    {withCredentials: true}
+    { withCredentials: true },
   );
   return data;
 };
@@ -19,24 +20,23 @@ export const getQuizzesByCourse = async (
 export const getQuizzesByUser = async (userId: string) => {
   const { data } = await axiosWithCredentials.get(
     `${QUIZZES_API}?userId=${userId}`,
-    {withCredentials: true}
+    { withCredentials: true },
   );
   return data;
 };
 
 export const getQuizById = async (quizId: string) => {
-  const { data } = await axios.get(`${QUIZZES_API}/${quizId}`,
-  );
+  const { data } = await axios.get(`${QUIZZES_API}/${quizId}`);
   return data;
 };
 
 export const createQuiz = async (quiz: object) => {
-  const { data } = await axiosWithCredentials.post(QUIZZES_API, {quiz: quiz});
+  const { data } = await axiosWithCredentials.post(QUIZZES_API, { quiz: quiz });
   return data;
 };
 
 export const updateQuiz = async (quiz: object) => {
-  const { data } = await axios.put(QUIZZES_API, {updates: quiz});
+  const { data } = await axios.put(QUIZZES_API, { updates: quiz });
   return data;
 };
 
@@ -45,16 +45,18 @@ export const deleteQuiz = async (quizId: string) => {
   return data;
 };
 
-export const addQuizAttempt = async (quizId: string, attempt: object) => {
+export const addQuizAttempt = async (attempt: QuizAttempt) => {
   const { data } = await axiosWithCredentials.post(
-    `${QUIZZES_API}/${quizId}/attempts`,
-    {attempt: attempt},
+    `${QUIZZES_API}/${attempt.quiz_id}/attempts`,
+    { attempt: attempt },
   );
   return data;
 };
 
 export const getQuizAttempts = async (quizId: string) => {
-  const { data } = await axios.get(`${QUIZZES_API}/${quizId}/attempts`, {withCredentials: true});
+  const { data } = await axios.get(`${QUIZZES_API}/${quizId}/attempts`, {
+    withCredentials: true,
+  });
   return data;
 };
 
