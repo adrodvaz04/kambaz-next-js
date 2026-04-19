@@ -66,6 +66,7 @@ export type QuizAttempt = {
     question_id: string;
     answer: string;
   }[];
+  score: number;
   attemptDate: Date;
 };
 

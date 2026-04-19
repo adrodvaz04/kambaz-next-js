@@ -43,7 +43,7 @@ export default function QuizContextModal({
             }}
           >
             {" "}
-            {quiz.published ? "Unpublish" : "Publish"} Quiz{" "}
+            Publish/Unpublish Quiz
           </Button>
           <Button
             size="lg"

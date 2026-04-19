@@ -1,8 +1,12 @@
 "use client";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import { useParams, redirect } from "next/navigation";
-
-export default function QuizDetails() {
-  const {cid, qid} = useParams();
-  redirect(`./${qid}/details`);
+export default function QuizPage() {
+  const { cid, qid } = useParams();
+  const router = useRouter();
+  useEffect(() => {
+    router.replace(`/kambaz/courses/${cid}/quizzes/${qid}/details`);
+  }, [cid, qid]);
+  return null;
 }
