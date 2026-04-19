@@ -2,10 +2,7 @@
 
 import { RootState } from "@/app/(kambaz)/store";
 import { redirect, useParams, usePathname } from "next/navigation";
-import {
-  useEffect,
-  useState
-} from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Form,
@@ -25,7 +22,7 @@ import {
   QuestionType,
   Quiz,
   QuizQuestion,
-  QuizType
+  QuizType,
 } from "../../types";
 import QuestionEditor from "./questionEditor";
 
@@ -83,7 +80,10 @@ export default function QuizEditor() {
   );
 
   // for question editor
-  const [questions, setQuestions] = useState<QuizQuestion[]>(quiz.questions ?? []);
+  const [questions, setQuestions] = useState<QuizQuestion[]>(
+    quiz.questions ?? [],
+  );
+  const [editing, setEditing] = useState<boolean>(false);
 
   useEffect(() => {
     // if not faculty, redirect
@@ -118,9 +118,10 @@ export default function QuizEditor() {
   const onSaveQuiz = async () => {
     const quizToSave = {
       ...quiz,
-      points: questions?.reduce((acc: number, q: QuizQuestion) => {
-        return acc + q.points;
-      }, 0) ?? 0,
+      points:
+        questions?.reduce((acc: number, q: QuizQuestion) => {
+          return acc + q.points;
+        }, 0) ?? 0,
       questions: questions ?? [],
       dueDate:
         quiz.dueDate instanceof Date
@@ -136,8 +137,6 @@ export default function QuizEditor() {
           : quiz.availableUntil,
     };
 
-    console.log(quizToSave);
-
     if (newQuiz) {
       const newQuizData = await quizzesClient.createQuiz(quizToSave);
       dispatch(setQuizzes([...quizzes, newQuizData]));
@@ -149,6 +148,7 @@ export default function QuizEditor() {
         ),
       );
     }
+    setEditing(false);
     redirect("../");
   };
 
@@ -183,6 +183,9 @@ export default function QuizEditor() {
   return (
     <div id="quiz-editor">
       <Form
+        onChange={() => {
+          setEditing(true);
+        }}
         onSubmit={(e) => {
           e.preventDefault();
           onSaveQuiz();
@@ -238,18 +241,17 @@ export default function QuizEditor() {
                       id="assignment-group"
                       defaultValue={quiz.assignment_group}
                     >
-                      {Object.values(AssignmentGroup)
-                        .map((v) => (
-                          <option
-                            key={v}
-                            onClick={() =>
-                              setQuiz({ ...quiz, assignment_group: v })
-                            }
-                          >
-                            {" "}
-                            {v}{" "}
-                          </option>
-                        ))}
+                      {Object.values(AssignmentGroup).map((v) => (
+                        <option
+                          key={v}
+                          onClick={() =>
+                            setQuiz({ ...quiz, assignment_group: v })
+                          }
+                        >
+                          {" "}
+                          {v}{" "}
+                        </option>
+                      ))}
                     </Form.Select>
                   </td>
                 </tr>
@@ -499,6 +501,7 @@ export default function QuizEditor() {
               setQuiz({ ...quiz, published: true });
               onSaveQuiz();
             }}
+            disabled={!editing}
           >
             Save and Publish
           </Button>
@@ -507,6 +510,7 @@ export default function QuizEditor() {
             size="lg"
             variant="primary"
             onClick={onSaveQuiz}
+            disabled={!editing}
           >
             {" "}
             Save {newQuiz ? "" : "Changes"}{" "}
