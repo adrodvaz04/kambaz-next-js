@@ -24,7 +24,7 @@ export default function Quizzes() {
     (state: RootState) => state.accountReducer,
   ) as any | null;
 
-  const isFaculty = currentUser.role === "FACULTY";
+  const isFaculty = currentUser ? currentUser.role === "FACULTY" : false;
 
   const dispatch = useDispatch();
 
@@ -103,95 +103,92 @@ export default function Quizzes() {
       <br />
       <hr />
 
-      {/* hardcoded splice for only string values*/}
-      {Object.values(AssignmentGroup)
-        .splice(0, 4)
-        .map((group: string) => (
-          <div key={group} className="">
-            <ListGroup className="my-3 pb-3 rounded-0">
-              <ListGroupItem>
-                <span className="fs-4 fw-bold"> {group} </span>
-              </ListGroupItem>
-              {quizzes
-                .filter((q: Quiz) => q.assignment_group === group)
-                .map((q: Quiz) => (
-                  <div key={q._id} className="size-fit">
-                    <ListGroupItem className="py-2">
-                      <IoRocketOutline
-                        size={32}
-                        className="float-start text-success me-3 my-2 mt-4"
-                      ></IoRocketOutline>
-                      <div className="d-flex gap-2 float-end">
-                        {q.published ? (
-                          <FaCheckCircle
-                            size={28}
-                            className="text-success mt-4"
-                          ></FaCheckCircle>
-                        ) : (
-                          <FaCircleXmark
-                            size={28}
-                            className="text-danger mt-4"
-                          ></FaCircleXmark>
-                        )}
-                        <Button
-                          variant=""
-                          className="mt-3"
-                          hidden={!isFaculty}
-                          onClick={() => setQuizToEdit(q)}
-                        >
-                          <IoEllipsisVertical size={28}></IoEllipsisVertical>
-                        </Button>
-                      </div>
-                      <div className="size-fit">
-                        <Link
-                          href={`./quizzes/${q._id}/${currentUser?.role === "FACULTY" ? "details" : "take-quiz"}`}
-                        >
-                          <b className="fs-3"> {q.title} </b>
-                        </Link>
-                        <br />
-                        <span className="fs-5">
-                          {" "}
-                          <b>
-                            {today < new Date(q.availableFrom)
-                              ? `Not available until ${new Date(q.availableFrom).toDateString()}`
-                              : today > new Date(q.availableUntil)
-                                ? "Closed"
-                                : "Available"}
-                          </b>
-                          {" | "}
-                          <b>Due</b> {new Date(q.dueDate).toDateString()} |{" "}
-                          {q.points.toString()} pts | {q.questions.length}{" "}
-                          {q.questions.length === 1 ? "Question" : "Questions"}
-                        </span>
-                      </div>
-                    </ListGroupItem>
-                    <QuizContextModal
-                      quiz={q}
-                      show={quizToEdit !== undefined}
-                      onCloseAction={() => setQuizToEdit(undefined)}
-                      onQuizDeleteAction={onQuizDelete}
-                      onQuizPublishAction={async () => {
-                        await quizzesClient.updateQuiz({
-                          ...q,
-                          published: !q.published,
-                        });
-                        dispatch(
-                          setQuizzes(
-                            quizzes.map((quiz: Quiz) =>
-                              quiz._id === quizToEdit!._id
-                                ? { ...quiz, published: !quiz.published }
-                                : quiz,
-                            ),
+      {Object.values(AssignmentGroup).map((group: string) => (
+        <div key={group}>
+          <ListGroup className="my-3 pb-3 rounded-0">
+            <ListGroupItem className="bg-secondary">
+              <span className="fs-4 fw-bold"> {group} </span>
+            </ListGroupItem>
+            {quizzes
+              .filter((q: Quiz) => q.assignment_group === group)
+              .map((q: Quiz) => (
+                <div key={q._id} className="size-fit">
+                  <ListGroupItem className="py-2">
+                    <IoRocketOutline
+                      size={32}
+                      className="float-start text-success me-3 my-2 mt-4"
+                    ></IoRocketOutline>
+                    <div className="d-flex gap-2 float-end">
+                      {q.published ? (
+                        <FaCheckCircle
+                          size={28}
+                          className="text-success mt-4"
+                        ></FaCheckCircle>
+                      ) : (
+                        <FaCircleXmark
+                          size={28}
+                          className="text-danger mt-4"
+                        ></FaCircleXmark>
+                      )}
+                      <Button
+                        variant=""
+                        className="mt-3"
+                        hidden={!isFaculty}
+                        onClick={() => setQuizToEdit(q)}
+                      >
+                        <IoEllipsisVertical size={28}></IoEllipsisVertical>
+                      </Button>
+                    </div>
+                    <div className="size-fit">
+                      <Link
+                        href={`./quizzes/${q._id}/${currentUser?.role === "FACULTY" ? "details" : "take-quiz"}`}
+                      >
+                        <b className="fs-3"> {q.title} </b>
+                      </Link>
+                      <br />
+                      <span className="fs-5">
+                        {" "}
+                        <b>
+                          {today < new Date(q.availableFrom)
+                            ? `Not available until ${new Date(q.availableFrom).toDateString()}`
+                            : today > new Date(q.availableUntil)
+                              ? "Closed"
+                              : "Available"}
+                        </b>
+                        {" | "}
+                        <b>Due</b> {new Date(q.dueDate).toDateString()} |{" "}
+                        {q.points.toString()} pts | {q.questions.length}{" "}
+                        {q.questions.length === 1 ? "Question" : "Questions"}
+                      </span>
+                    </div>
+                  </ListGroupItem>
+                  <QuizContextModal
+                    quiz={q}
+                    show={quizToEdit !== undefined}
+                    onCloseAction={() => setQuizToEdit(undefined)}
+                    onQuizDeleteAction={onQuizDelete}
+                    onQuizPublishAction={async () => {
+                      await quizzesClient.updateQuiz({
+                        ...q,
+                        published: !q.published,
+                      });
+                      dispatch(
+                        setQuizzes(
+                          quizzes.map((quiz: Quiz) =>
+                            quiz._id === quizToEdit!._id
+                              ? { ...quiz, published: !quiz.published }
+                              : quiz,
                           ),
-                        );
-                      }}
-                    ></QuizContextModal>
-                  </div>
-                ))}
-              <br />
-            </ListGroup>
-          </div>
-        ))}
+                        ),
+                      );
+                    }}
+                  ></QuizContextModal>
+                </div>
+              ))}
+            <br />
+          </ListGroup>
+        </div>
+      ))}
     </div>
   );
 }
