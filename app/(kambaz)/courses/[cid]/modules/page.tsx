@@ -9,7 +9,7 @@ import * as client from "../../client";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./modulesControls";
-import { editModule, setModules } from "./reducer";
+import { setModules } from "./reducer";
 
 export default function Modules() {
   const { cid } = useParams();
