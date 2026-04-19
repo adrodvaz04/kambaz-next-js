@@ -5,16 +5,18 @@ import { FaTrash } from "react-icons/fa6";
 import { FaPencil } from "react-icons/fa6";
 
 export default function ModuleControlButtons({
+  show,
   moduleId,
   deleteModule,
   editModule
 }: {
+  show: boolean;
   moduleId: string;
   deleteModule: (moduleId: string) => void;
   editModule: (moduleId: string) => void;
 }) {
   return (
-    <div className="float-end">
+    <div className="float-end" hidden={!show}>
       <FaPencil className="text-primary me-3" onClick={() => editModule(moduleId)}></FaPencil>
       <GreenCheckmark />
       <IoEllipsisVertical className="fs-4" />
