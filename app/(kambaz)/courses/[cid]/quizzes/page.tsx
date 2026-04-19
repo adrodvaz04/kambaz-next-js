@@ -1,52 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { redirect, useParams } from "next/navigation";
-import { setQuizzes } from "./reducer";
-import * as quizzesClient from "./client";
 import { RootState } from "@/app/(kambaz)/store";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  ListGroup,
-  ListGroupItem,
-  FormControl,
-  Button,
-  Row,
-} from "react-bootstrap";
-import { Quiz, QuizType, AssignmentGroup } from "./types";
-import { FaCircleXmark, FaPlus, FaRocket } from "react-icons/fa6";
-import { IoEllipsisVertical, IoRocketOutline } from "react-icons/io5";
-import { FaCheckCircle } from "react-icons/fa";
-import QuizContextModal from "./[qid]/quizContextModal";
 import Link from "next/link";
+import { redirect, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button, FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
+import { FaCheckCircle } from "react-icons/fa";
+import { FaCircleXmark, FaPlus } from "react-icons/fa6";
+import { IoEllipsisVertical, IoRocketOutline } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
+import QuizContextModal from "./[qid]/quizContextModal";
+import * as quizzesClient from "./client";
+import { setQuizzes } from "./reducer";
+import { AssignmentGroup, Quiz } from "./types";
 
 export default function Quizzes() {
-  const testQuizzes: Quiz[] = [
-    {
-      _id: "id",
-      title: "title here",
-      userId: "string",
-      course: "string",
-      availableFrom: new Date(),
-      availableUntil: new Date(),
-      dueDate: new Date(),
-      points: 123,
-      published: true,
-      quizType: QuizType.GRADED_QUIZ,
-      assignment_group: AssignmentGroup.QUIZZES,
-      shuffle_answers: false,
-      time_limit_mins: 123,
-      multiple_attempts: true,
-      max_attempts: 21,
-      show_correct_answers: true,
-      access_code: "string",
-      one_question_at_a_time: true,
-      webcam_required: true,
-      lock_questions: true,
-      questions: [],
-    },
-  ];
-
   const { cid } = useParams();
   const { quizzes = [] } = useSelector(
     (state: RootState) => state.quizzesReducer,
@@ -56,6 +24,8 @@ export default function Quizzes() {
     (state: RootState) => state.accountReducer,
   ) as any | null;
 
+  const isFaculty = currentUser.role === "FACULTY";
+
   const dispatch = useDispatch();
 
   const [quizToEdit, setQuizToEdit] = useState<Quiz | undefined>(undefined);
@@ -64,7 +34,7 @@ export default function Quizzes() {
     const fetchQuizzes = async (cid: string) => {
       try {
         let quizzesData: Quiz[];
-        if (currentUser && currentUser.role === "FACULTY") {
+        if (currentUser && isFaculty) {
           quizzesData = await quizzesClient.getQuizzesByCourse(cid, false);
         } else {
           quizzesData = await quizzesClient.getQuizzesByCourse(cid, true);
@@ -78,18 +48,20 @@ export default function Quizzes() {
       }
     };
     fetchQuizzes(cid as string);
-  }, [dispatch, currentUser, cid]);
+  }, [dispatch, currentUser, isFaculty, cid]);
 
   const onQuizDelete = async (quizId: string) => {
     const deletedQuiz = await quizzesClient.deleteQuiz(quizId);
-    dispatch(setQuizzes(quizzes.filter((q: Quiz) => q._id !== deletedQuiz._id)));
+    dispatch(
+      setQuizzes(quizzes.filter((q: Quiz) => q._id !== deletedQuiz._id)),
+    );
   };
 
   const onNewQuizClick = () => {
     redirect("./quizzes/new");
   };
 
-  console.log(quizzes);
+  const today = new Date();
 
   return (
     <div id="quizzes-view">
@@ -119,6 +91,7 @@ export default function Quizzes() {
         </Button>
         <Button
           size="lg"
+          disabled={!isFaculty}
           className="btn btn-danger d-flex p-2 px-3 float-end mx-3"
           onClick={onNewQuizClick}
         >
@@ -163,21 +136,32 @@ export default function Quizzes() {
                         <Button
                           variant=""
                           className="mt-3"
+                          hidden={!isFaculty}
                           onClick={() => setQuizToEdit(q)}
                         >
                           <IoEllipsisVertical size={28}></IoEllipsisVertical>
                         </Button>
                       </div>
                       <div className="size-fit">
-                        <Link href={`./quizzes/${q._id}/${currentUser?.role === "FACULTY" ? 'details' : 'take-quiz'}`}>
+                        <Link
+                          href={`./quizzes/${q._id}/${currentUser?.role === "FACULTY" ? "details" : "take-quiz"}`}
+                        >
                           <b className="fs-3"> {q.title} </b>
                         </Link>
                         <br />
                         <span className="fs-5">
                           {" "}
+                          <b>
+                            {today < new Date(q.availableFrom)
+                              ? `Not available until ${new Date(q.availableFrom).toDateString()}`
+                              : today > new Date(q.availableUntil)
+                                ? "Closed"
+                                : "Available"}
+                          </b>
+                          {" | "}
                           <b>Due</b> {new Date(q.dueDate).toDateString()} |{" "}
                           {q.points.toString()} pts | {q.questions.length}{" "}
-                          Questions
+                          {q.questions.length === 1 ? "Question" : "Questions"}
                         </span>
                       </div>
                     </ListGroupItem>

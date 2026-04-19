@@ -24,6 +24,7 @@ export default function Profile() {
   const updateProfile = async () => {
     const updatedProfile = await client.updateUser(profile);
     dispatch(setCurrentUser(updatedProfile));
+    redirect("../../dashboard");
   };
 
   useEffect(() => {

@@ -49,7 +49,7 @@ export default function QuizEditor() {
           availableUntil: new Date(),
           dueDate: new Date(),
           points: 0,
-          published: true,
+          published: false,
           quizType: QuizType.GRADED_QUIZ,
           assignment_group: AssignmentGroup.QUIZZES,
           shuffle_answers: false,

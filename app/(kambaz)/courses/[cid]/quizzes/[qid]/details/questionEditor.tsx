@@ -15,6 +15,22 @@ export default function QuestionEditor({
 }) {
   const [question, setQuestion] = useState<QuizQuestion>(quizQuestion);
   const [editingView, setEditingView] = useState<boolean>(false);
+  const [warning, setWarning] = useState<string | undefined>();
+
+  const validateQuestion = (question: QuizQuestion) => {
+    if (question.answers.length == 0) {
+      return setWarning("Please include at least one answer.");
+    } else if (!question.answers.some((a) => a.correct)) {
+      return setWarning("Please set at least one correct question.");
+    } else if (
+      question.answers.some((a) => a.correct && a.text.trim() === "")
+    ) {
+      return setWarning("Please ensure your correct answer is not empty text.");
+    }
+
+    setWarning(undefined);
+    return true;
+  };
 
   const onNewAnswer = () => {
     if (question?.questionType === QuestionType.TRUE_FALSE) return; // if true/false, do not allow adding answer
@@ -90,220 +106,216 @@ export default function QuestionEditor({
   };
 
   return (
-    (
-      <div key={question._id} className="mx-5 mb-5 border border-2 fs-5" >
-        <div className="d-flex gap-3 p-3" id="question-editor-header">
+    <div key={question._id} className="mx-5 mb-5 border border-2 fs-5">
+      <div className="d-flex gap-3 p-3" id="question-editor-header">
+        <FormControl
+          size="lg"
+          defaultValue={question.title}
+          disabled={!editingView}
+          onChange={(e) => setQuestion({ ...question, title: e.target.value })}
+        />
+        <Form.Select
+          size="lg"
+          defaultValue={question.questionType}
+          disabled={!editingView}
+          onChange={onChangeQuestionType}
+        >
+          {Object.values(QuestionType).map((v) => (
+            <option key={v} value={v}>
+              {" "}
+              {v}{" "}
+            </option>
+          ))}
+        </Form.Select>
+        <span className="mt-2"> Pts </span>
+        <FormControl
+          type="number"
+          size="lg"
+          disabled={!editingView}
+          min="0"
+          defaultValue={question.points?.toString() ?? 0}
+          onChange={(e) =>
+            setQuestion({
+              ...question,
+              points: Math.max(0, parseInt(e.target.value) || 0),
+            })
+          }
+        ></FormControl>
+        <Button
+          size="lg"
+          variant={editingView ? "secondary" : "primary"}
+          className="d-flex"
+          disabled={editingView}
+          onClick={() => {
+            setEditingView(true);
+          }}
+        >
+          {" "}
+          <FaPencil className="me-3 mt-1"></FaPencil> Edit{" "}
+        </Button>
+      </div>
+      <div id="quiz-editor-body" hidden={!editingView}>
+        <hr />
+        <div className="px-4 mb-4">
+          <h4> Question: </h4>
           <FormControl
             size="lg"
-            defaultValue={question.title}
-            disabled={!editingView}
-            onChange={(e) =>
-              setQuestion({ ...question, title: e.target.value })
-            }
-          />
-          <Form.Select
-            size="lg"
-            defaultValue={question.questionType}
-            disabled={!editingView}
-            onChange={onChangeQuestionType}
-          >
-            {Object.values(QuestionType).map((v) => (
-              <option key={v} value={v}>
-                {" "}
-                {v}{" "}
-              </option>
-            ))}
-          </Form.Select>
-          <span className="mt-2"> Pts </span>
-          <FormControl
-            type="number"
-            size="lg"
-            disabled={!editingView}
-            min="0"
-            defaultValue={question.points?.toString() ?? 0}
+            defaultValue={question.question}
+            placeholder="Enter text..."
             onChange={(e) =>
               setQuestion({
-                ...question,
-                points: Math.max(0, parseInt(e.target.value) || 0),
+                ...question!,
+                question: e.target.value,
               })
             }
           ></FormControl>
+        </div>
+
+        <div className="px-5 mb-4">
+          <div className="d-flex gap-3 mb-4">
+            <h4 className="mt-1"> Answers: </h4>
+            <Button
+              className="d-flex"
+              variant="primary"
+              size="lg"
+              hidden={question.questionType === QuestionType.TRUE_FALSE}
+              onClick={onNewAnswer}
+            >
+              <FaPlus></FaPlus>
+            </Button>
+          </div>
+
+          {question.questionType === QuestionType.TRUE_FALSE ? (
+            <div>
+              {question.answers.map((answer: Answer) => (
+                <Form.Check
+                  key={answer._id}
+                  name={question.title}
+                  type="radio"
+                  label={
+                    <span>
+                      {answer.text}
+                      {answer.correct && (
+                        <span className="ms-2 text-success text-nowrap">
+                          Correct Answer
+                        </span>
+                      )}
+                    </span>
+                  }
+                  checked={answer.correct}
+                  onChange={() => {
+                    onSelectAnswer(answer._id);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div>
+              {question.answers.map((answer: Answer, idx) => (
+                <div key={idx} className="d-flex gap-4 mb-3">
+                  <Form.Check
+                    label={
+                      answer.correct &&
+                      question?.questionType !== QuestionType.FILL_IN_BLANK && (
+                        <span className="pt-2 text-success text-nowrap">
+                          {" "}
+                          Correct Answer{" "}
+                        </span>
+                      )
+                    }
+                    defaultChecked={answer.correct}
+                    className="pt-2"
+                    type="radio"
+                    name={question._id}
+                    hidden={
+                      question.questionType === QuestionType.FILL_IN_BLANK
+                    }
+                    onClick={() => {
+                      onSelectAnswer(answer._id);
+                    }}
+                  ></Form.Check>
+
+                  <FormControl
+                    size="lg"
+                    defaultValue={answer.text}
+                    placeholder="Enter text..."
+                    onChange={(e) => {
+                      const updatedAnswers = question.answers.map((a) =>
+                        a._id === answer._id
+                          ? { ...answer, text: e.target.value }
+                          : a,
+                      );
+                      setQuestion({
+                        ...question,
+                        answers: updatedAnswers,
+                      });
+                    }}
+                  ></FormControl>
+                  <Button
+                    size="lg"
+                    variant="danger"
+                    hidden={
+                      question.questionType === QuestionType.TRUE_FALSE ||
+                      question.answers.length == 1
+                    }
+                    onClick={() => {
+                      const filteredAnswers =
+                        question.answers?.filter(
+                          (a: Answer) => a._id !== answer._id,
+                        ) ?? [];
+                      setQuestion({
+                        ...question,
+                        answers: filteredAnswers,
+                      });
+                    }}
+                  >
+                    {" "}
+                    <FaMinus></FaMinus>{" "}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          <hr />
           <Button
             size="lg"
-            variant={editingView ? "secondary" : "primary"}
-            className="d-flex"
-            disabled={editingView}
             onClick={() => {
-              setEditingView(true);
+              if (!validateQuestion(question)) return;
+              onUpdateQuestion({
+                ...question,
+              });
+              setEditingView(false);
             }}
           >
             {" "}
-            <FaPencil className="me-3 mt-1"></FaPencil> Edit{" "}
+            Update Question{" "}
+          </Button>
+          <span className="text-danger ps-2"> {warning} </span>
+
+          <Button
+            size="lg"
+            variant="secondary"
+            className="float-end ms-3"
+            onClick={() => {
+              setEditingView(false);
+              setQuestion(quizQuestion);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            size="lg"
+            variant="danger"
+            className="float-end"
+            onClick={() => {
+              onDeleteQuestion(question._id);
+            }}
+          >
+            {" "}
+            Delete Question{" "}
           </Button>
         </div>
-        <div id="quiz-editor-body" hidden={!editingView}>
-          <hr />
-          <div className="px-4 mb-4">
-            <h4> Question: </h4>
-            <FormControl
-              size="lg"
-              defaultValue={question.question}
-              placeholder="Enter text..."
-              onChange={(e) =>
-                setQuestion({
-                  ...question!,
-                  question: e.target.value,
-                })
-              }
-            ></FormControl>
-          </div>
-
-          <div className="px-5 mb-4">
-            <div className="d-flex gap-3 mb-4">
-              <h4 className="mt-1"> Answers: </h4>
-              <Button
-                className="d-flex"
-                variant="primary"
-                size="lg"
-                hidden={question.questionType === QuestionType.TRUE_FALSE}
-                onClick={onNewAnswer}
-              >
-                <FaPlus></FaPlus>
-              </Button>
-            </div>
-
-            {question.questionType === QuestionType.TRUE_FALSE ? (
-              <div>
-                {question.answers.map((answer: Answer) => (
-                  <Form.Check
-                    key={answer._id}
-                    name={question.title}
-                    type="radio"
-                    label={
-                      <span>
-                        {answer.text}
-                        {answer.correct && (
-                          <span className="ms-2 text-success text-nowrap">
-                            Correct Answer
-                          </span>
-                        )}
-                      </span>
-                    }
-                    checked={answer.correct}
-                    onChange={() => {
-                      onSelectAnswer(answer._id);
-                    }}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div>
-                {question.answers.map((answer: Answer, idx) => (
-                  <div key={idx} className="d-flex gap-4 mb-3">
-                    <Form.Check
-                      label={
-                        answer.correct &&
-                        question?.questionType !==
-                          QuestionType.FILL_IN_BLANK && (
-                          <span className="pt-2 text-success text-nowrap">
-                            {" "}
-                            Correct Answer{" "}
-                          </span>
-                        )
-                      }
-                      defaultChecked={answer.correct}
-                      className="pt-2"
-                      type="radio"
-                      name={question._id}
-                      hidden={
-                        question.questionType === QuestionType.FILL_IN_BLANK
-                      }
-                      onClick={() => {
-                        onSelectAnswer(answer._id);
-                      }}
-                    ></Form.Check>
-
-                    <FormControl
-                      size="lg"
-                      defaultValue={answer.text}
-                      placeholder="Enter text..."
-                      onChange={(e) => {
-                        const updatedAnswers = question.answers.map((a) =>
-                          a._id === answer._id
-                            ? { ...answer, text: e.target.value }
-                            : a,
-                        );
-                        setQuestion({
-                          ...question,
-                          answers: updatedAnswers,
-                        });
-                      }}
-                    ></FormControl>
-                    <Button
-                      size="lg"
-                      variant="danger"
-                      hidden={
-                        question.questionType === QuestionType.TRUE_FALSE ||
-                        question.answers.length == 1
-                      }
-                      onClick={() => {
-                        const filteredAnswers =
-                          question.answers?.filter(
-                            (a: Answer) => a._id !== answer._id,
-                          ) ?? [];
-                        setQuestion({
-                          ...question,
-                          answers: filteredAnswers,
-                        });
-                      }}
-                    >
-                      {" "}
-                      <FaMinus></FaMinus>{" "}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <hr />
-            <Button
-              size="lg"
-              disabled={
-                question.answers.length < 1 ||
-                !question.answers.some((q) => q.correct)
-              }
-              onClick={() => {
-                onUpdateQuestion(question);
-                setEditingView(false);
-              }}
-            >
-              {" "}
-              Update Question{" "}
-            </Button>
-            <Button
-              size="lg"
-              variant="secondary"
-              className="float-end ms-3"
-              onClick={() => {
-                setEditingView(false);
-                setQuestion(quizQuestion);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="lg"
-              variant="danger"
-              className="float-end"
-              onClick={() => {
-                onDeleteQuestion(question._id);
-              }}
-            >
-              {" "}
-              Delete Question{" "}
-            </Button>
-          </div>
-        </div>
       </div>
-    )
+    </div>
   );
 }
