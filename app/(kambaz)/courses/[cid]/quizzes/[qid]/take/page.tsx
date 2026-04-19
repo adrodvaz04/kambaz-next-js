@@ -44,7 +44,7 @@ import React from "react";
 
 
 export default function TakeQuiz() {
-  const { qid } = useParams();
+  const { qid, cid } = useParams();
   const dispatch = useDispatch();
 
 
@@ -63,66 +63,54 @@ const attemptsInfo = useSelector((state: RootState) => state.takeQuizReducer.att
 
 
 
-
-  // loading quiz
-
-  /* const loadQuiz = async () => {
-    const quizData = {
-      _id: "3325e63f-279a-480c-af2d-1fa2d0b7ed9b",
-      title: "Test Quiz",
-      points: 20,
-      access_code: "",
-      one_question_at_a_time: false,
-      show_correct_answers: true,
-      questions: testQuestions,
-    };
-    dispatch(setQuiz(quizData));
-    dispatch(setAttemptInfo({ remaining: 1, attempts: [] }));
-    dispatch(setPhase("taking"));
-  };
-  useEffect(() => {
-  dispatch(resetTakeQuiz());
-  loadQuiz();
-}, []); */
+// loading quiz 
 
    const loadQuiz = async () => {
     
     if (!qid || Array.isArray(qid)) return;
     
-
-
-    // get quiz
-
-    
     let quizData  = await client.getQuizById(qid);
     console.log("quizData:", quizData);
-    quizData = { ...quizData, access_code: "", one_question_at_a_time: false}
+    quizData = { ...quizData}
     console.log("quiz:", quizData);
     dispatch(setQuiz(quizData));
 
     // get attempts
 
-    let attemptsData = { remaining: 1, attempts: [] };
-    try {
-        attemptsData = await client.getQuizAttempts(qid);
-      } catch (err) {
-        console.log("Could not fetch attempts, defaulting:", err);
+    let attemptsData = { remaining: quizData.max_attempts ?? 1, attempts: [] as { score: number; answers: any[] }[] };
+
+      try {
+        const fetched = await client.getQuizAttempts(qid);
+        const attemptsList = Array.isArray(fetched) ? fetched : fetched.attempts ?? [];
+        attemptsData = {
+          attempts: attemptsList, 
+          remaining: Math.max(0, quizData.max_attempts - attemptsList.length)
+        }
+      }
+      catch (err) {
+        console.log("no fetched attempts found")
       }
       dispatch(setAttemptInfo(attemptsData));
+
    
 
     // if there's no attempts left
-    if (attemptsData.remaining === 0 && attemptsData.attempts?.length > 0) {
-      const { data: attempts } = await client.getQuizAttempts(qid);
-      const lastAttempt = attempts[0]
+  console.log("remaining:", attemptsData.remaining, "attempts:", attemptsData.attempts);
+
+  if (attemptsData.remaining === 0) {
+      const lastAttempt = attemptsData.attempts[0];
+
       dispatch(setSubmission({
-        score: lastAttempt.score,
+        score: lastAttempt.score ?? 0 ,
         showAnswers: quizData.show_correct_answers,
       }));  
-        return;
-      }
-      dispatch(setPhase(quizData.access_code ? "access-code" : "taking"));
-  };
+       dispatch(setPhase("submitted"));
+       return;
+  }
+  dispatch(setPhase(quizData.access_code ? "access-code" : "taking"));
+};
+
+
   useEffect(() => {
     dispatch(resetTakeQuiz());
     loadQuiz();
@@ -170,6 +158,7 @@ const attemptsInfo = useSelector((state: RootState) => state.takeQuizReducer.att
             score: earned_points,
             showAnswers: quiz.show_correct_answers,
         }));
+        dispatch(setPhase("submitted"))
     }
     catch (err) {
         console.log("Failed to submit quiz:",/* JSON.stringify(err) */);
@@ -253,7 +242,17 @@ const attemptsInfo = useSelector((state: RootState) => state.takeQuizReducer.att
           {quiz.questions.map((q: any, i: number) => renderQuestion(q, i))}
         </div>
       )}
-      <button onClick={() => window.history.back()}>Back</button>
+      {attemptsInfo?.remaining > 0 && (
+        <button onClick={() => {
+          setAnswers([]);
+          setCurrentQuestionIndex(0)
+          loadQuiz();
+        }
+        }>Retake Quiz ({attemptsInfo.remaining} attempts remaining)
+
+        </button>
+      )}
+      <button onClick={() => router.push(`/courses/${cid}/quizzes`)}>Back</button>
     </div>
   );
   
