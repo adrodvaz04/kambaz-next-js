@@ -11,6 +11,7 @@ export const getQuizzesByCourse = async (
 ) => {
   const { data } = await axios.get(
     `${QUIZZES_API}?courseId=${courseId}${onlyPublished ? "&published=true" : ""}`,
+    {withCredentials: true}
   );
   return data;
 };
@@ -18,12 +19,14 @@ export const getQuizzesByCourse = async (
 export const getQuizzesByUser = async (userId: string) => {
   const { data } = await axiosWithCredentials.get(
     `${QUIZZES_API}?userId=${userId}`,
+    {withCredentials: true}
   );
   return data;
 };
 
 export const getQuizById = async (quizId: string) => {
-  const { data } = await axios.get(`${QUIZZES_API}/${quizId}`);
+  const { data } = await axios.get(`${QUIZZES_API}/${quizId}`,
+  );
   return data;
 };
 
@@ -51,7 +54,7 @@ export const addQuizAttempt = async (quizId: string, attempt: object) => {
 };
 
 export const getQuizAttempts = async (quizId: string) => {
-  const { data } = await axios.get(`${QUIZZES_API}/${quizId}/attempts`);
+  const { data } = await axios.get(`${QUIZZES_API}/${quizId}/attempts`, {withCredentials: true});
   return data;
 };
 

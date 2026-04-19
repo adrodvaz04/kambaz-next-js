@@ -169,7 +169,7 @@ export default function Quizzes() {
                         </Button>
                       </div>
                       <div className="size-fit">
-                        <Link href={`./quizzes/${q._id}/${currentUser?.role === "FACULTY" ? 'details' : 'take-quiz'}`}>
+                        <Link href={`./quizzes/${q._id}/${currentUser?.role === "FACULTY" ? 'details' : 'take'}`}>
                           <b className="fs-3"> {q.title} </b>
                         </Link>
                         <br />
