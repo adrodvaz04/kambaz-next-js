@@ -116,19 +116,22 @@ export default function Dashboard() {
       courseId,
     );
 
-    console.log("new enrollment", newEnrollment);
-
+    // note new enrollments will have the course populated.
     dispatch(setEnrollments([...enrollments, newEnrollment]));
-    console.log("enrollments post enroll: ", enrollments);
   };
 
   const onUnenroll = async (courseId: string) => {
     if (!currentUser?._id) return;
 
-    await enrollmentsClient.unenrollUser(currentUser._id, courseId);
+    const unenrollment = await enrollmentsClient.unenrollUser(
+      currentUser._id,
+      courseId,
+    );
 
     dispatch(
-      setEnrollments(enrollments.filter((e: any) => e._id !== courseId)),
+      setEnrollments(
+        enrollments.filter((e: any) => e._id !== courseId),
+      ),
     );
   };
 
