@@ -88,7 +88,9 @@ export default function Dashboard() {
 
   const onDeleteCourse = async (courseId: string) => {
     await coursesClient.deleteCourse(courseId);
-    dispatch(setCourses(courses.filter((course) => (course as any)._id !== courseId)));
+    dispatch(
+      setCourses(courses.filter((course) => (course as any)._id !== courseId)),
+    );
   };
 
   const onUpdateCourse = async () => {
@@ -114,19 +116,22 @@ export default function Dashboard() {
       courseId,
     );
 
-    console.log('new enrollment', newEnrollment);
-
+    // note new enrollments will have the course populated.
     dispatch(setEnrollments([...enrollments, newEnrollment]));
-    console.log('enrollments post enroll: ', enrollments);
   };
 
   const onUnenroll = async (courseId: string) => {
     if (!currentUser?._id) return;
 
-    await enrollmentsClient.unenrollUser(currentUser._id, courseId);
+    const unenrollment = await enrollmentsClient.unenrollUser(
+      currentUser._id,
+      courseId,
+    );
 
     dispatch(
-      setEnrollments(enrollments.filter((e: any) => e._id !== courseId)),
+      setEnrollments(
+        enrollments.filter((e: any) => e._id !== courseId),
+      ),
     );
   };
 
@@ -148,6 +153,7 @@ export default function Dashboard() {
           className="btn btn-warning float-end me-2"
           onClick={onUpdateCourse}
           id="wd-update-course-click"
+          hidden={!currentUser || currentUser.role !== "FACULTY"}
         >
           Update{" "}
         </Button>
@@ -155,6 +161,7 @@ export default function Dashboard() {
           onClick={onAddNewCourse}
           className="btn btn-primary float-end me-3"
           id="wd-add-new-course-click"
+          hidden={!currentUser || currentUser.role !== "FACULTY"}
         >
           Add
         </Button>
@@ -187,9 +194,7 @@ export default function Dashboard() {
               <Card>
                 <Link
                   onNavigate={(e) => {
-                    if (
-                      !(currentUser && isEnrolled(course._id))
-                    ) {
+                    if (!(currentUser && isEnrolled(course._id))) {
                       e.preventDefault();
                     }
                   }}
@@ -225,6 +230,7 @@ export default function Dashboard() {
                     </Button>
                     <Button
                       id="wd-edit-course-click"
+                      hidden={!currentUser || currentUser.role !== "FACULTY"}
                       onClick={(event) => {
                         event.preventDefault();
                         setCourse(course);
@@ -235,6 +241,7 @@ export default function Dashboard() {
                     </Button>
                     <Button
                       className="btn btn-danger float-end"
+                      hidden={!currentUser || currentUser.role !== "FACULTY"}
                       onClick={(event) => {
                         event.preventDefault();
                         onDeleteCourse(course._id);

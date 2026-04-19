@@ -2,6 +2,9 @@
 
 # not adding .idea, since we r working in vsc
 
+# debugging scripts
+launch.json
+
 # dependencies
 /node_modules
 /.pnp

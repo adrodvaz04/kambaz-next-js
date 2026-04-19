@@ -1,27 +1,27 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import * as client from "../../client";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./modulesControls";
-import * as client from "../../client";
-import {
-  addModule,
-  deleteModule,
-  editModule,
-  updateModule,
-  setModules,
-} from "./reducer";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../../store";
+import { setModules } from "./reducer";
 
 export default function Modules() {
   const { cid } = useParams();
   const { modules } = useSelector((state: RootState) => state.modulesReducer);
   const [moduleName, setModuleName] = useState<string>("");
   const dispatch = useDispatch();
+
+  const { currentUser } = useSelector(
+    (state: RootState) => state.accountReducer,
+  ) as any | null;
+
+  const isFaculty = currentUser ? currentUser.role === "FACULTY" : false;
 
   const onCreateModuleForCourse = async () => {
     if (!cid || Array.isArray(cid)) {
@@ -80,23 +80,24 @@ export default function Modules() {
               {module.editing && (
                 <FormControl
                   className="w-50 d-inline-block"
-                  onChange={(e) =>
-                    setModuleName(e.target.value)
-                  }
+                  onChange={(e) => setModuleName(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      onUpdateModule({ ...module, name: moduleName, editing: false });
+                      onUpdateModule({
+                        ...module,
+                        name: moduleName,
+                        editing: false,
+                      });
                     }
                   }}
                   defaultValue={module.name}
                 />
               )}
               <ModuleControlButtons
+                show={isFaculty}
                 moduleId={module._id}
                 deleteModule={(moduleId: string) => onRemoveModule(moduleId)}
-                editModule={(moduleId: string) =>
-                  dispatch(editModule(moduleId))
-                }
+                editModule={() => onUpdateModule(module)}
               />{" "}
             </div>
             {module.lessons && (
