@@ -42,8 +42,7 @@ export default function QuizContextModal({
               onCloseAction();
             }}
           >
-            {" "}
-            Publish/Unpublish Quiz
+            {quiz.published ? "Unpublish" : "Publish"} Quiz
           </Button>
           <Button
             size="lg"

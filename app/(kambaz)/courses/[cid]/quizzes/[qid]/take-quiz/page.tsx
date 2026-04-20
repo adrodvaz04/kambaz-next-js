@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { redirect, useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../../store";
 import {
@@ -12,7 +12,15 @@ import {
 
 import { useEffect, useState } from "react";
 import * as client from "../../client";
-import { Answer, Quiz, QuizAttempt, QuizQuestion } from "../../types";
+import {
+  Answer,
+  QuestionType,
+  Quiz,
+  QuizAttempt,
+  QuizQuestion,
+} from "../../types";
+import { Button, Card, FormControl } from "react-bootstrap";
+import { FaCheck, FaPencil, FaXmark } from "react-icons/fa6";
 
 export default function TakeQuiz() {
   const { qid, cid } = useParams();
@@ -38,6 +46,8 @@ export default function TakeQuiz() {
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer,
   ) as any;
+
+  const isFaculty = currentUser ? currentUser.role === "FACULTY" : false;
 
   const router = useRouter();
 
@@ -139,13 +149,15 @@ export default function TakeQuiz() {
         }
       });
 
-      await client.addQuizAttempt({
-        answers,
-        score: earned_points,
-        quiz_id: qid,
-        user_id: currentUser._id,
-        attemptDate: new Date(),
-      });
+      if (!isFaculty) {
+        await client.addQuizAttempt({
+          answers,
+          score: earned_points,
+          quiz_id: qid,
+          user_id: currentUser._id,
+          attemptDate: new Date(),
+        });
+      }
 
       dispatch(
         setSubmission({
@@ -205,116 +217,151 @@ export default function TakeQuiz() {
 
   const renderQuestion = (q: QuizQuestion, index: number) => {
     const selected = getAnswer(q._id);
-    return (
-      <div key={index}>
-        <p>
-          {index + 1}. {q.question} ({q.points} pts)
-        </p>
-
-        {q.questionType === "Multiple Choice" &&
-          q.answers.map((opt: Answer, i: number) => (
-            <div key={i}>
-              <input
-                type="radio"
-                name={`q-${q._id}`}
-                id={`q-${q._id}-${i}`}
-                value={opt.text}
-                checked={selected === opt.text}
-                onChange={() => handleAnswerChange(q._id, opt.text)}
-                disabled={phase === "submitted"}
-              />
-              <label htmlFor={`q-${q._id}-${i}`}>
-                {opt.text}
-                {showAnswers &&
-                  opt === q.answers.find((a: Answer) => a.correct) &&
-                  " ✓"}
-                {showAnswers &&
-                  selected === opt.text &&
-                  opt !== q.answers.find((a: Answer) => a.correct) &&
-                  " ✗"}
-              </label>
-            </div>
-          ))}
-        {q.questionType === "True/False" &&
-          ["True", "False"].map((opt) => (
-            <div key={opt}>
-              <input
-                type="radio"
-                name={`q-${q._id}`}
-                id={`q-${q._id}-${opt}`}
-                value={opt}
-                checked={selected === opt}
-                onChange={() => handleAnswerChange(q._id, opt)}
-                disabled={phase === "submitted"}
-              />
-              <label htmlFor={`q-${q._id}-${opt}`}>
-                {opt}
-                {showAnswers &&
-                  opt === q.answers.find((a: Answer) => a.correct)?.text &&
-                  " ✓"}
-                {showAnswers &&
-                  selected === opt &&
-                  opt !== q.answers.find((a: Answer) => a.correct)?.text &&
-                  " ✗"}
-              </label>
-            </div>
-          ))}
-
-        {q.questionType === "Fill-in-the-blank" && (
-          <div>
+    let renderedAnswers;
+    switch (q.questionType) {
+      case QuestionType.MULTIPLE_CHOICE:
+      case QuestionType.TRUE_FALSE:
+        renderedAnswers = q.answers.map((opt: Answer, i: number) => (
+          <div key={i}>
+            <hr />
             <input
-              type="text"
-              value={selected}
-              placeholder="Your answer..."
-              onChange={(e) => handleAnswerChange(q._id, e.target.value)}
+              className="ms-5"
+              type="radio"
+              name={`q-${q._id}`}
+              id={`q-${q._id}-${i}`}
+              value={opt.text}
+              checked={selected === opt.text}
+              onChange={() => handleAnswerChange(q._id, opt.text)}
               disabled={phase === "submitted"}
             />
-            {showAnswers && (
-              <p>
-                Correct answer: {q.answers.find((a: Answer) => a.correct)?.text}
-              </p>
+            <label htmlFor={`q-${q._id}-${i}`} className="fs-4 p-2">
+              {opt.text}
+              {showAnswers &&
+                opt === q.answers.find((a: Answer) => a.correct) && (
+                  <FaCheck color="green" className="ms-2"></FaCheck>
+                )}
+              {showAnswers &&
+                selected === opt.text &&
+                opt !== q.answers.find((a: Answer) => a.correct) && (
+                  <FaXmark color="red" className="ms-2"></FaXmark>
+                )}
+            </label>
+          </div>
+        ));
+        break;
+
+      case QuestionType.FILL_IN_BLANK:
+        renderedAnswers = (
+          <div>
+            <div className="px-2 d-flex">
+              <FormControl
+                className="py-2 ms-2 mt-3 mb-2"
+                size="lg"
+                type="text"
+                value={selected}
+                placeholder="Your answer..."
+                onChange={(e) => handleAnswerChange(q._id, e.target.value)}
+                disabled={phase === "submitted"}
+              />
+            </div>
+
+            {showAnswers && !(selected in q.answers.map((a) => a.text)) && (
+              <span className="fs-4 pt-1 px-2 text-success">
+                Correct {q.answers.length == 1 ? "answer" : "answers"}:
+                {q.answers
+                  .map((a: Answer) => {
+                    return ` ${a.text}`;
+                  })
+                  .toString()}
+              </span>
             )}
           </div>
-        )}
+        );
+        break;
+    }
+
+    return (
+      <div key={index}>
+        <span className="p-3 fs-4">
+          {!quiz?.one_question_at_a_time ? `${index + 1}.` : ""} {q.question}
+        </span>
+
+        {renderedAnswers}
       </div>
     );
   };
 
   if (!currentUser) {
     return (
-      <div>
-        Sorry, please sign in to take the quiz.
-        <button onClick={() => router.push("/account/signin")}>Sign In</button>
+      <div className="p-4">
+        <span className="fs-3">Sorry, please sign in to take the quiz.</span>
+        <br />
+        <Button
+          className="mt-3"
+          variant="danger"
+          size="lg"
+          onClick={() => router.push("/account/signin")}
+        >
+          Sign In
+        </Button>
       </div>
     );
   }
 
   if (phase === "loading") return <div>Loading quiz...</div>;
-  if (!quiz) return <div>Quiz not found.</div>;
+
+  if (!quiz)
+    return (
+      <div>
+        Quiz not found.
+        <br />
+        <Button
+          className="mt-3"
+          variant="danger"
+          size="lg"
+          onClick={() => router.push("/account/signin")}
+        >
+          Sign In
+        </Button>
+      </div>
+    );
 
   if (phase === "submitted")
     return (
       <div>
         <h1>Quiz Submitted</h1>
-        <p>
+        <br />
+        <h3>
           Score: {score} / {quiz?.points} pts
-        </p>
+        </h3>
+        <hr />
         {showAnswers && quiz?.questions && (
-          <div>
-            <h4>Answer Review:</h4>
-            {quiz.questions.map((q: QuizQuestion, i: number) =>
-              renderQuestion(q, i),
-            )}
-          </div>
+          <Card>
+            <Card.Header className="fs-4">Answer Review:</Card.Header>
+            <Card.Body>
+              {quiz.questions.map((q: QuizQuestion, i: number) => (
+                <div key={i}>
+                  {renderQuestion(q, i)}
+                  <br />
+                </div>
+              ))}
+            </Card.Body>
+          </Card>
         )}
-        {attemptsInfo?.remaining > 0 && (
-          <button onClick={handleRetakeQuiz}>
-            Retake Quiz ({attemptsInfo.remaining} attempts remaining)
-          </button>
-        )}
-        <button onClick={() => router.push(`/courses/${cid}/quizzes`)}>
+        <Button
+          size="lg"
+          hidden={attemptsInfo.remaining >= 1}
+          onClick={handleRetakeQuiz}
+        >
+          Retake Quiz ({attemptsInfo.remaining} attempts remaining)
+        </Button>
+        <Button
+          className="mt-3"
+          size="lg"
+          onClick={() => router.push(`/courses/${cid}/quizzes`)}
+        >
           Back
-        </button>
+        </Button>
       </div>
     );
 
@@ -322,43 +369,83 @@ export default function TakeQuiz() {
   const oneAtATime = quiz.one_question_at_a_time;
 
   return (
-    <div>
+    <div className="p-3 pt-2">
+      <Button
+        size="lg"
+        variant="secondary"
+        className="float-end"
+        hidden={!isFaculty}
+        disabled={!isFaculty}
+        onClick={() => redirect("./details")}
+      >
+        {" "}
+        <FaPencil /> Back To Editor{" "}
+      </Button>
       <h1>{quiz.title}</h1>
-      <p>{attemptsInfo?.remaining ?? "?"} attempt(s) remaining</p>
+      <hr />
+      <h5>
+        {" "}
+        {quiz.points} {quiz.points !== 1 ? "Points" : "Point"}
+      </h5>
+      <span className="fs-5">
+        {attemptsInfo?.remaining ?? "?"}{" "}
+        {attemptsInfo.remaining == 1 ? "attempt" : "attempts"} remaining
+      </span>
       <hr />
       {oneAtATime ? (
         <div>
-          <p>
-            Question {currentQuestionIndex + 1} of {questions.length}
-          </p>
-          {renderQuestion(
-            questions[currentQuestionIndex],
-            currentQuestionIndex,
-          )}
-          <div>
-            <button
-              disabled={currentQuestionIndex === 0}
-              onClick={() => setCurrentQuestionIndex((i) => i - 1)}
+          <Card className="border">
+            <Card.Header className="fs-4 py-3">
+              Question {currentQuestionIndex + 1} of {questions.length}
+              <div className="float-end">
+                {questions[currentQuestionIndex].points} pts
+              </div>
+            </Card.Header>
+            <Card.Body>
+              {renderQuestion(
+                questions[currentQuestionIndex],
+                currentQuestionIndex,
+              )}
+            </Card.Body>
+          </Card>
+          <br />
+          <div className="gap-3 p-2"></div>
+          <Button
+            size="lg"
+            className="me-3"
+            disabled={currentQuestionIndex === 0}
+            onClick={() => setCurrentQuestionIndex((i) => i - 1)}
+          >
+            ← Previous
+          </Button>
+          {currentQuestionIndex < questions.length - 1 ? (
+            <Button
+              size="lg"
+              onClick={() => setCurrentQuestionIndex((i) => i + 1)}
             >
-              ← Previous
-            </button>
-            {currentQuestionIndex < questions.length - 1 ? (
-              <button onClick={() => setCurrentQuestionIndex((i) => i + 1)}>
-                Next →
-              </button>
-            ) : (
-              <button onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Submitting..." : "Submit Quiz"}
-              </button>
-            )}
-          </div>
+              Next →
+            </Button>
+          ) : (
+            <Button
+              className="float-end"
+              variant="danger"
+              size="lg"
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting ? "Submitting..." : "Submit Quiz"}
+            </Button>
+          )}
         </div>
       ) : (
         <div>
           {questions.map((q: QuizQuestion, i: number) => renderQuestion(q, i))}
-          <button onClick={handleSubmit} disabled={submitting}>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting || answers.some((a) => a.answer.trim() === "")}
+          >
             {submitting ? "Submitting..." : "Submit Quiz"}
-          </button>
+          </Button>
         </div>
       )}
     </div>
