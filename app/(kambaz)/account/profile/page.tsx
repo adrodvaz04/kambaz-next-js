@@ -12,10 +12,12 @@ export default function Profile() {
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer,
   );
+
   const fetchProfile = () => {
     if (!currentUser) return redirect("/account/signin");
     setProfile(currentUser);
   };
+
   const signout = async () => {
     await client.signout();
     dispatch(setCurrentUser(null));
@@ -88,7 +90,7 @@ export default function Profile() {
           >
             <option value="USER">User</option>
             <option value="ADMIN">Admin</option>
-            <option value="FACULTY">Faculty</option>{" "}
+            <option value="FACULTY">Faculty</option>
             <option value="STUDENT">Student</option>
           </select>
           <Button

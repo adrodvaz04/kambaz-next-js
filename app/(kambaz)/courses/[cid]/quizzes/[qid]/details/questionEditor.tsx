@@ -312,6 +312,7 @@ export default function QuestionEditor({
             className="float-end"
             onClick={() => {
               onDeleteQuestion(question._id);
+              setWarning(undefined);
             }}
           >
             {" "}
