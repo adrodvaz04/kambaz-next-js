@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import { FormControl, Button } from "react-bootstrap";
+import {
+  FormControl,
+  Button,
+  Card,
+  CardHeader,
+  CardBody,
+} from "react-bootstrap";
 
 export default function Signin() {
   const [credentials, setCredentials] = useState<any>({});
@@ -46,6 +52,30 @@ export default function Signin() {
         {" "}
         Sign up{" "}
       </Link>
+
+      <br />
+      <br />
+      <br />
+      <Card>
+        <CardHeader className="fs-3">Final Project Submission</CardHeader>
+        <CardBody className="fs-4">
+          Team: Adrian Rodriguez (adrodvaz04), Madison Seal (madisonseal) 
+          <br />
+          Section: Online Async 
+          <br />
+          Prof. Annunziato
+          <br />
+          <Link href={"https://github.com/adrodvaz04/kambaz-next-js"}>
+            {" "}
+            FE Link{" "}
+          </Link>
+          <br />
+          <Link href={"https://github.com/adrodvaz04/kambaz-node-server-app"}>
+            {" "}
+            BE Link
+          </Link>
+        </CardBody>
+      </Card>
     </div>
   );
 }

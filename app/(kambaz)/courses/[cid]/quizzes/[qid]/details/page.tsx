@@ -522,7 +522,7 @@ export default function QuizEditor() {
             onClick={onTakeQuiz}
           >
             {" "}
-            Take Quiz{" "}
+            Preview Quiz{" "}
           </Button>
         </div>
       </Form>
