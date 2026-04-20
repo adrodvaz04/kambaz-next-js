@@ -37,6 +37,11 @@ export default function QuizEditor() {
     (state: RootState) => state.accountReducer,
   ) as any | null;
 
+  // if not faculty, redirect
+  if (!currentUser || currentUser.role !== "FACULTY") {
+    redirect("./take-quiz");
+  }
+
   // set with a new quiz object
   const [quiz, setQuiz] = useState<Quiz>(
     newQuiz
@@ -86,11 +91,6 @@ export default function QuizEditor() {
   const [editing, setEditing] = useState<boolean>(false);
 
   useEffect(() => {
-    // if not faculty, redirect
-    if (!currentUser || currentUser.role !== "FACULTY") {
-      redirect("./take-quiz");
-    }
-
     if (!newQuiz && quizzes.length > 0) {
       const selectedQuiz = quizzes.find((q) => q._id === qid);
       if (selectedQuiz) {

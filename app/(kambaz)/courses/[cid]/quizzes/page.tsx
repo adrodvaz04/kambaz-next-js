@@ -58,7 +58,7 @@ export default function Quizzes() {
   };
 
   const onNewQuizClick = () => {
-    redirect("./quizzes/new");
+    redirect("./quizzes/new/details");
   };
 
   const today = new Date();

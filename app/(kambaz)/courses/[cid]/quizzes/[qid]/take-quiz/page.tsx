@@ -329,6 +329,17 @@ export default function TakeQuiz() {
   if (phase === "submitted")
     return (
       <div>
+        <Button
+        size="lg"
+        variant="secondary"
+        className="float-end"
+        hidden={!isFaculty}
+        disabled={!isFaculty}
+        onClick={() => redirect("./details")}
+      >
+        {" "}
+        <FaPencil /> Back To Editor{" "}
+      </Button>
         <h1>Quiz Submitted</h1>
         <br />
         <h3>
