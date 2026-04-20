@@ -109,8 +109,14 @@ export default function Quizzes() {
             <ListGroupItem className="bg-secondary">
               <span className="fs-4 fw-bold"> {group} </span>
             </ListGroupItem>
+            
             {quizzes
               .filter((q: Quiz) => q.assignment_group === group)
+              .sort(
+                (a, b) =>
+                  new Date(a.availableFrom).getTime() -
+                  new Date(b.availableFrom).getTime(),
+              )
               .map((q: Quiz) => (
                 <div key={q._id} className="size-fit">
                   <ListGroupItem className="py-2">
